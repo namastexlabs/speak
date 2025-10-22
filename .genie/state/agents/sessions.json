@@ -68,6 +68,20 @@
       "lastPrompt": "Execute Forge implementation for \"Speak Initial Product Enhancements\" wish.\n\n**Wish Context:**\nLocated at `.genie/wishes/speak-initial-enhancements/wish.md` - comprehensive plan to differentiate Speak",
       "mode": "default",
       "sessionId": "4471a601-4897-451c-ae8f-65a926f205bc",
+      "background": true,
+      "preset": "default"
+    },
+    "speak-enhancements-review": {
+      "agent": "review",
+      "name": "speak-enhancements-review",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:45:08.764Z",
+      "lastUsed": "2025-10-22T23:45:08.764Z",
+      "lastPrompt": "Review the Forge implementation for \"Speak Initial Product Enhancements\" wish and validate completeness.\n\n**Wish Document:** `.genie/wishes/speak-initial-enhancements/wish.md`\n\n**What Forge Claimed to",
+      "mode": "default",
+      "sessionId": "e2a6150a-e37e-4bbe-9f36-5df748be64a7",
       "background": true
     }
   }
