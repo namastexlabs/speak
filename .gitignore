@@ -1,6 +1,9 @@
 # User Context (project-specific, per-user)
 .genie/CONTEXT.md
 
+# Agent State (runtime state files)
+.genie/state/
+
 # Environment Variables
 .env
 .env.local
