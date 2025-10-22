@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speak - Open Source Voice Dictation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066CC;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: #e8f4fd;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .hotkey {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .feature h3 {
+            color: #0066CC;
+            margin-top: 0;
+        }
+        .coming-soon {
+            opacity: 0.7;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Speak</h1>
+        <p style="text-align: center; font-size: 18px; color: #666;">
+            Your voice, your data, your control - Open source voice dictation for everyone
+        </p>
+
+        <div class="status">
+            <h2>🚧 MVP Development in Progress</h2>
+            <p>Core features are being implemented. Check back soon for the first release!</p>
+        </div>
+
+        <h2>How to Use (Coming Soon)</h2>
+        <ol>
+            <li>Install Speak on your platform</li>
+            <li>Configure your microphone and API key</li>
+            <li>Hold <span class="hotkey">Ctrl+Win</span> to start dictating</li>
+            <li>Speak clearly and release when done</li>
+            <li>Text appears instantly in any application</li>
+        </ol>
+
+        <h2>Key Features</h2>
+        <div class="features">
+            <div class="feature">
+                <h3>🎯 Universal Dictation</h3>
+                <p>Works in any application via global hotkey. No app switching required.</p>
+            </div>
+            <div class="feature">
+                <h3>🛡️ Privacy First</h3>
+                <p>Your voice stays on your device. Local processing by default.</p>
+            </div>
+            <div class="feature">
+                <h3>🐧 Linux Support</h3>
+                <p>Native support for Linux distributions - no compromises.</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ High Performance</h3>
+                <p>OpenAI Whisper models deliver <95% accuracy with <2 second latency.</p>
+            </div>
+            <div class="feature">
+                <h3>🔓 Open Source</h3>
+                <p>Full transparency, community-driven, and self-hostable.</p>
+            </div>
+            <div class="feature">
+                <h3>🌍 Multi-Language</h3>
+                <p>Support for 50+ languages with automatic detection.</p>
+            </div>
+        </div>
+
+        <h2>Coming Soon</h2>
+        <div class="features">
+            <div class="feature coming-soon">
+                <h3>📱 Offline Mode</h3>
+                <p>Local Whisper models for complete privacy (Q1 2026)</p>
+            </div>
+            <div class="feature coming-soon">
+                <h3>🎨 Voice Commands</h3>
+                <p>Format text with voice: "new paragraph", "bullet list" (Q1 2026)</p>
+            </div>
+            <div class="feature coming-soon">
+                <h3>🤝 Team Features</h3>
+                <p>Shared dictionaries and collaboration tools (Q2 2026)</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p>
+                <a href="https://github.com/yourusername/speak">View on GitHub</a> |
+                <a href="./docs/">Documentation</a> |
+                <a href="./docs/why-speak.md">Why Speak?</a>
+            </p>
+            <p style="color: #666; font-size: 14px;">
+                Speak is free, open source, and built for the future of voice interaction.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Basic renderer script - full functionality in development
+        console.log('Speak renderer loaded');
+
+        // Placeholder for future functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Speak UI ready');
+        });
+    </script>
+</body>
+</html>
