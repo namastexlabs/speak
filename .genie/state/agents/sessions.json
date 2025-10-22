@@ -1,0 +1,74 @@
+{
+  "version": 3,
+  "sessions": {
+    "speak-initial-enhancements-discovery": {
+      "agent": "code/wish/discovery",
+      "name": "speak-initial-enhancements-discovery",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:30:32.879Z",
+      "lastUsed": "2025-10-22T23:30:32.879Z",
+      "lastPrompt": "Execute discovery phase for the \"Speak Initial Product Enhancements\" wish.\n\n**Context:**\nWe're building Speak, an open-source voice dictation app (Electron-based) as a privacy-focused alternative to W",
+      "mode": "default",
+      "sessionId": "609010b8-5a8e-4ba5-85fe-bcef9af7f0ff",
+      "background": true,
+      "preset": "default"
+    },
+    "speak-initial-enhancements-forge": {
+      "agent": "forge",
+      "name": "speak-initial-enhancements-forge",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:32:18.756Z",
+      "lastUsed": "2025-10-22T23:32:18.756Z",
+      "lastPrompt": "Execute Forge implementation for \"Speak Initial Product Enhancements\" wish.\n\n**Wish Context:**\nLocated at `.genie/wishes/speak-initial-enhancements/wish.md` - comprehensive plan to differentiate Speak",
+      "mode": "default",
+      "sessionId": "f296b725-f63c-4417-bfd2-87a6b431e78b",
+      "background": true,
+      "preset": "default"
+    },
+    "learn-commit-before-agents": {
+      "agent": "learn",
+      "name": "learn-commit-before-agents",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:34:02.690Z",
+      "lastUsed": "2025-10-22T23:34:02.690Z",
+      "lastPrompt": "Document a critical workflow lesson learned.\n\n**What Happened:**\nI created a wish document at `.genie/wishes/speak-initial-enhancements/wish.md` and immediately launched discovery and forge agents WIT",
+      "mode": "default",
+      "sessionId": "f58857f6-8766-4235-9711-1df5e75ae86c",
+      "background": true,
+      "preset": "default"
+    },
+    "speak-enhancements-discovery": {
+      "agent": "code/wish/discovery",
+      "name": "speak-enhancements-discovery",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:34:25.428Z",
+      "lastUsed": "2025-10-22T23:34:25.428Z",
+      "lastPrompt": "Execute discovery phase for the \"Speak Initial Product Enhancements\" wish.\n\n**Context:**\nWe're building Speak, an open-source voice dictation app (Electron-based) as a privacy-focused alternative to W",
+      "mode": "default",
+      "sessionId": "9213d65c-26dc-4840-b3dd-4daabb6aad91",
+      "background": true,
+      "preset": "default"
+    },
+    "speak-enhancements-forge": {
+      "agent": "forge",
+      "name": "speak-enhancements-forge",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:34:39.678Z",
+      "lastUsed": "2025-10-22T23:34:39.678Z",
+      "lastPrompt": "Execute Forge implementation for \"Speak Initial Product Enhancements\" wish.\n\n**Wish Context:**\nLocated at `.genie/wishes/speak-initial-enhancements/wish.md` - comprehensive plan to differentiate Speak",
+      "mode": "default",
+      "sessionId": "4471a601-4897-451c-ae8f-65a926f205bc",
+      "background": true
+    }
+  }
+}
