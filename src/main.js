@@ -11,6 +11,11 @@ const path = require('path');
 // This ensures settings are stored in "Speak" folder instead of "Electron"
 app.setName('Speak');
 
+// Set app user model ID for Windows notifications (fixes "Electron" showing in notifications)
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.speak.dictation');
+}
+
 // Import our modules
 const settingsManager = require('./config/settings');
 const audioRecorder = require('./audio/recorder');
