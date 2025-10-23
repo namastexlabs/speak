@@ -38,6 +38,9 @@ class PTTManager {
     this.holdTimer = null;
     // Failsafe: ensure we never get stuck recording due to missed keyup
     this.safetyTimer = null;
+    // NEW: Polling-based key state checker
+    this.pollingInterval = null;
+    this.wasAllKeysPressed = false;
   }
 
   /**
@@ -72,7 +75,62 @@ class PTTManager {
     uIOhook.start();
     this.isEnabled = true;
 
+    // Start polling key state every 50ms
+    this.startPolling();
+
     return { success: true };
+  }
+
+  /**
+   * Poll key state continuously - more reliable than keyup events
+   */
+  startPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+
+    this.pollingInterval = setInterval(() => {
+      const allPressed = this.allKeysPressed();
+
+      // Detect state changes
+      if (allPressed && !this.wasAllKeysPressed) {
+        // Keys just pressed
+        console.log('PTT POLL: Keys pressed');
+        if (!this.pressStartTime) {
+          this.pressStartTime = Date.now();
+        }
+
+        if (!this.isRecording && !this.holdTimer) {
+          this.holdTimer = setTimeout(() => {
+            this.holdTimer = null;
+            if (this.allKeysPressed()) {
+              this.startRecording();
+            } else {
+              this.pressStartTime = null;
+            }
+          }, this.minHoldTime);
+        }
+      } else if (!allPressed && this.wasAllKeysPressed) {
+        // Keys just released
+        console.log('PTT POLL: Keys released');
+
+        if (this.holdTimer) {
+          clearTimeout(this.holdTimer);
+          this.holdTimer = null;
+          this.pressStartTime = null;
+        }
+
+        if (this.isRecording) {
+          const holdDuration = this.pressStartTime ? Date.now() - this.pressStartTime : 0;
+          console.log(`PTT POLL: Stopping recording (held ${holdDuration}ms)`);
+          this.stopRecording();
+        }
+
+        this.pressStartTime = null;
+      }
+
+      this.wasAllKeysPressed = allPressed;
+    }, 50); // Poll every 50ms
   }
 
   /**
@@ -352,11 +410,18 @@ class PTTManager {
   stop() {
     if (!this.isEnabled) return;
 
+    // Stop polling
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+
     // Clean up
     this.isEnabled = false;
     this.isRecording = false;
     this.currentKeys.clear();
     this.pressStartTime = null;
+    this.wasAllKeysPressed = false;
 
     if (this.holdTimer) {
       clearTimeout(this.holdTimer);
