@@ -315,3 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
         hotkeyInput.addEventListener('change', updateModalHotkeyDisplay);
     }
 });
+
+// Export openSettings to window for global access
+window.openSettings = openSettings;
