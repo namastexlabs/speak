@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speak - Open Source Voice Dictation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Alegreya+Sans:wght@400;500;700;800&family=Manrope:wght@400;500;600;700&family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-primary: 'Alegreya Sans', sans-serif;
+            --font-secondary: 'Manrope', sans-serif;
+            --font-mono: 'Chivo Mono', 'Fira Code', monospace;
+
+            /* Dracula theme colors */
+            --color-bg: hsl(231, 15%, 18%);  /* #282A36 */
+            --color-fg: hsl(60, 30%, 96%);   /* #F8F8F2 */
+            --color-selection: hsl(232, 14%, 31%);  /* #44475A */
+            --color-comment: hsl(225, 27%, 51%);    /* #6272A4 */
+            --color-purple: hsl(265, 89%, 78%);     /* #BD93F9 */
+            --color-pink: hsl(326, 100%, 74%);      /* #FF79C6 */
+            --color-cyan: hsl(191, 97%, 77%);       /* #8BE9FD */
+            --color-green: hsl(135, 94%, 65%);      /* #50FA7B */
+            --color-yellow: hsl(65, 92%, 76%);      /* #F1FA8C */
+            --color-orange: hsl(31, 100%, 71%);     /* #FFB86C */
+            --color-red: hsl(0, 100%, 67%);         /* #FF5555 */
+        }
+
+        body {
+            font-family: var(--font-secondary);
+            margin: 0;
+            padding: 20px;
+            background: var(--color-bg);
+            color: var(--color-fg);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-primary);
+            font-weight: 700;
+        }
+
+        code, pre, .font-mono, .hotkey-display {
+            font-family: var(--font-mono);
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--color-selection);
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--color-comment);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--color-purple);
+            padding-bottom: 20px;
+        }
+        h1 {
+            color: var(--color-purple);
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .settings-btn {
+            background: var(--color-purple);
+            color: var(--color-bg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .settings-btn:hover {
+            background: var(--color-pink);
+            box-shadow: 0 0 15px hsla(265, 89%, 78%, 0.5);
+        }
+        .status-card {
+            background: var(--color-bg);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid var(--color-comment);
+            border-left: 4px solid var(--color-purple);
+        }
+        .status-ready {
+            border-left-color: var(--color-green);
+            background: hsla(135, 94%, 65%, 0.1);
+        }
+        .status-recording {
+            border-left-color: var(--color-red);
+            background: hsla(0, 100%, 67%, 0.1);
+            animation: pulse 1s infinite;
+        }
+        .status-error {
+            border-left-color: var(--color-yellow);
+            background: hsla(65, 92%, 76%, 0.1);
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .hotkey-display {
+            background: var(--color-bg);
+            border: 2px solid var(--color-cyan);
+            color: var(--color-cyan);
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 0;
+            letter-spacing: 0.5px;
+        }
+        .recording-indicator {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            padding: 24px;
+            border: 1px solid var(--color-comment);
+            border-radius: 8px;
+            text-align: center;
+            background: var(--color-bg);
+            transition: all 0.2s;
+        }
+        .feature:hover {
+            border-color: var(--color-purple);
+            box-shadow: 0 4px 12px hsla(265, 89%, 78%, 0.2);
+        }
+        .feature h3 {
+            color: var(--color-purple);
+            margin-top: 10px;
+        }
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .instructions {
+            background: hsla(191, 97%, 77%, 0.1);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--color-cyan);
+        }
+        .instructions ol {
+            margin: 0;
+            padding-left: 24px;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        .test-controls {
+            background: var(--color-bg);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--color-comment);
+        }
+        .test-controls h3 {
+            margin-top: 0;
+            color: var(--color-purple);
+        }
+        .btn {
+            background: var(--color-green);
+            color: var(--color-bg);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: hsl(135, 94%, 60%);
+            box-shadow: 0 0 15px hsla(135, 94%, 65%, 0.5);
+        }
+        .btn-secondary {
+            background: var(--color-comment);
+            color: var(--color-fg);
+        }
+        .btn-secondary:hover {
+            background: hsl(225, 27%, 56%);
+        }
+        .btn-danger {
+            background: var(--color-red);
+            color: var(--color-bg);
+        }
+        .btn-danger:hover {
+            background: hsl(0, 100%, 62%);
+            box-shadow: 0 0 15px hsla(0, 100%, 67%, 0.5);
+        }
+        .status-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .last-transcription {
+            background: var(--color-bg);
+            padding: 20px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-style: italic;
+            border-left: 3px solid var(--color-yellow);
+            border: 1px solid var(--color-comment);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--color-comment);
+            color: var(--color-comment);
+            font-size: 14px;
+        }
+        .footer a {
+            color: var(--color-cyan);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: var(--color-purple);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Speak</h1>
+            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+        </div>
+
+        <p style="text-align: center; font-size: 18px; color: #666; margin-bottom: 30px;">
+            Your voice, your data, your control - Open source voice dictation for everyone
+        </p>
+
+        <div id="status-card" class="status-card status-ready">
+            <div class="status-text" id="status-text">🎯 Ready to Dictate</div>
+            <p id="status-description">Hold <span id="hotkey-display" class="hotkey-display">Ctrl + Hold</span> to start recording</p>
+        </div>
+
+        <div class="instructions">
+            <h3>🚀 How to Use Speak</h3>
+            <ol>
+                <li>Make sure your microphone is connected and permissions are granted</li>
+                <li>Hold the hotkey (<span id="hotkey-instruction">Ctrl</span>) to start recording</li>
+                <li>Speak clearly and naturally</li>
+                <li>Release the hotkey to stop recording and insert text</li>
+                <li>Text appears instantly at your cursor position</li>
+            </ol>
+        </div>
+
+        <div class="test-controls">
+            <h3>🧪 Test Controls</h3>
+            <p>Use these buttons to test the dictation system:</p>
+            <button class="btn" onclick="startRecording()" id="start-btn">🎙️ Start Recording</button>
+            <button class="btn btn-danger" onclick="stopRecording()" id="stop-btn" disabled>⏹️ Stop Recording</button>
+            <div id="test-status"></div>
+        </div>
+
+        <div id="last-transcription" class="last-transcription" style="display: none;">
+            <strong>Last transcription:</strong> <span id="transcription-text"></span>
+        </div>
+
+        <h2>✨ Key Features</h2>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Universal Dictation</h3>
+                <p>Works in any application via global hotkey. No app switching required.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <h3>Privacy First</h3>
+                <p>Your voice is processed by OpenAI Whisper with end-to-end encryption.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🐧</div>
+                <h3>Cross-Platform</h3>
+                <p>Native support for Windows, macOS, and Linux distributions.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>High Performance</h3>
+                <p>OpenAI Whisper models deliver excellent accuracy with low latency.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔓</div>
+                <h3>Open Source</h3>
+                <p>Full transparency, community-driven, and self-hostable.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌍</div>
+                <h3>Multi-Language</h3>
+                <p>Support for multiple languages with automatic detection.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <a href="#" onclick="openExternal('https://github.com/namastexlabs/speak')">View on GitHub</a> |
+                <a href="#" onclick="openExternal('./docs/')">Documentation</a> |
+                <a href="#" onclick="openExternal('./docs/why-speak.md')">Why Speak?</a>
+            </p>
+            <p>Speak is free, open source, and built for the future of voice interaction.</p>
+        </div>
+    </div>
+
+    <div class="recording-indicator" id="recording-indicator">
+        🎙️ Recording...
+    </div>
+
+    <script src="audio-bridge.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

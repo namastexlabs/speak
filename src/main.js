@@ -22,6 +22,8 @@ const audioRecorder = require('./audio/recorder');
 const whisperTranscriber = require('./transcription/whisper');
 const textInserter = require('./insertion/text-inserter');
 const hotkeyManager = require('./hotkey/manager');
+const pttManager = require('./hotkey/ptt-manager');
+const transcriptionHistory = require('./config/history');
 const SystemTray = require('./ui/tray');
 const notificationManager = require('./ui/notifications');
 const errorHandler = require('./utils/error-handler');
@@ -203,11 +205,15 @@ function setupIPCHandlers() {
   });
 
   // Recording handlers (Web Audio API in renderer)
-  ipcMain.handle('start-recording', async () => {
+  ipcMain.handle('start-recording', async (event, options = {}) => {
     try {
       await audioRecorder.startRecording();
       systemTray.setRecordingState(true);
-      notificationManager.showRecordingStarted();
+
+      // Only show notification if not triggered by hotkey
+      if (!options.fromHotkey) {
+        notificationManager.showRecordingStarted();
+      }
 
       return { success: true };
     } catch (error) {
@@ -215,14 +221,16 @@ function setupIPCHandlers() {
     }
   });
 
-  ipcMain.handle('stop-recording', async (event, audioData) => {
+  ipcMain.handle('stop-recording', async (event, audioData, options = {}) => {
     try {
       // Receive audio data from renderer process
       const savedAudio = await audioRecorder.stopRecording(audioData);
       systemTray.setRecordingState(false);
 
-      // Transcribe the audio
-      notificationManager.showRecordingStopped();
+      // Only show "Recording stopped" notification if not from hotkey
+      if (!options.fromHotkey) {
+        notificationManager.showRecordingStopped();
+      }
 
       const transcription = await whisperTranscriber.transcribeAudio(
         savedAudio.filePath,
@@ -235,6 +243,19 @@ function setupIPCHandlers() {
       // Show completion notification
       const wordCount = transcription.text.trim().split(/\s+/).length;
       notificationManager.showTranscriptionCompleted(transcription.text, wordCount);
+
+      // Save to history
+      const settings = settingsManager.getAll();
+      const historyEntry = transcriptionHistory.add({
+        text: transcription.text,
+        duration: savedAudio.duration || 0,
+        language: settings.language
+      });
+
+      // Notify renderer about new transcription
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('transcription-added', historyEntry);
+      }
 
       // Clean up
       audioRecorder.cleanup();
@@ -319,6 +340,23 @@ function setupIPCHandlers() {
 
     return { success: true };
   });
+
+  // History handlers
+  ipcMain.handle('get-history', async () => {
+    try {
+      return transcriptionHistory.getGroupedByDate();
+    } catch (error) {
+      return errorHandler.handleError(error, { handler: 'get-history' });
+    }
+  });
+
+  ipcMain.handle('get-stats', async () => {
+    try {
+      return transcriptionHistory.getStats();
+    } catch (error) {
+      return errorHandler.handleError(error, { handler: 'get-stats' });
+    }
+  });
 }
 
 // Set up hotkey callbacks
@@ -373,20 +411,31 @@ app.whenReady().then(async () =>{
   // Create system tray
   systemTray = new SystemTray(mainWindow);
 
-  // Set up hotkey system
-  setupHotkeyCallbacks();
-  const hotkeyResult = hotkeyManager.registerHotkey(
+  // Set up PTT system
+  const pttCallback = (action) => {
+    if (mainWindow && mainWindow.webContents) {
+      if (action === 'start') {
+        mainWindow.webContents.send('hotkey-start-recording');
+      } else if (action === 'stop') {
+        mainWindow.webContents.send('hotkey-stop-recording');
+      }
+    }
+  };
+
+  const pttResult = pttManager.start(
     settingsManager.getAll().hotkey,
-    hotkeyManager.recordingCallback
+    pttCallback
   );
 
-  if (!hotkeyResult.success) {
-    console.warn('Failed to register initial hotkey:', hotkeyResult.error);
+  if (!pttResult.success) {
+    console.warn('Failed to start PTT:', pttResult.error);
     notificationManager.showError(
-      'Hotkey Registration Failed',
-      'Could not register the global hotkey. You can configure it in settings.',
-      hotkeyResult.error
+      'PTT Registration Failed',
+      'Could not register the push-to-talk hotkey. You can configure it in settings.',
+      pttResult.error
     );
+  } else {
+    console.log('PTT system started successfully');
   }
 
   // Set up notification event handlers
@@ -411,7 +460,7 @@ app.on('before-quit', () => {
   if (systemTray) {
     systemTray.destroy();
   }
-  hotkeyManager.unregisterHotkey();
+  pttManager.stop();
   notificationManager.cleanup();
   errorHandler.cleanup();
 });

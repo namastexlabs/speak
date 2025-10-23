@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: luxury --default;
+}
+
+/* Custom font imports */
+@import url('https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Alegreya+Sans:wght@400;500;700;800&family=Manrope:wght@400;500;600;700&family=Noto+Emoji:wght@300..700&display=swap');
+
+/* Custom CSS variables */
+:root {
+  --font-primary: 'Alegreya Sans', sans-serif;
+  --font-secondary: 'Manrope', sans-serif;
+  --font-mono: 'Chivo Mono', 'Fira Code', monospace;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary);
+}
+
+body {
+  font-family: var(--font-secondary);
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Timeline animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-entry {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Recording pulse animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px hsl(var(--er) / 0.5);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 40px hsl(var(--er) / 0.8);
+  }
+}
+
+.recording-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling for luxury theme */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--b2));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--b3));
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--bc) / 0.3);
+}

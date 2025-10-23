@@ -1,340 +1,171 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="luxury">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speak - Open Source Voice Dictation</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Alegreya+Sans:wght@400;500;700;800&family=Manrope:wght@400;500;600;700&family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --font-primary: 'Alegreya Sans', sans-serif;
-            --font-secondary: 'Manrope', sans-serif;
-            --font-mono: 'Chivo Mono', 'Fira Code', monospace;
-
-            /* Dracula theme colors */
-            --color-bg: hsl(231, 15%, 18%);  /* #282A36 */
-            --color-fg: hsl(60, 30%, 96%);   /* #F8F8F2 */
-            --color-selection: hsl(232, 14%, 31%);  /* #44475A */
-            --color-comment: hsl(225, 27%, 51%);    /* #6272A4 */
-            --color-purple: hsl(265, 89%, 78%);     /* #BD93F9 */
-            --color-pink: hsl(326, 100%, 74%);      /* #FF79C6 */
-            --color-cyan: hsl(191, 97%, 77%);       /* #8BE9FD */
-            --color-green: hsl(135, 94%, 65%);      /* #50FA7B */
-            --color-yellow: hsl(65, 92%, 76%);      /* #F1FA8C */
-            --color-orange: hsl(31, 100%, 71%);     /* #FFB86C */
-            --color-red: hsl(0, 100%, 67%);         /* #FF5555 */
-        }
-
-        body {
-            font-family: var(--font-secondary);
-            margin: 0;
-            padding: 20px;
-            background: var(--color-bg);
-            color: var(--color-fg);
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-primary);
-            font-weight: 700;
-        }
-
-        code, pre, .font-mono, .hotkey-display {
-            font-family: var(--font-mono);
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: var(--color-selection);
-            padding: 40px;
-            border-radius: 8px;
-            border: 1px solid var(--color-comment);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--color-purple);
-            padding-bottom: 20px;
-        }
-        h1 {
-            color: var(--color-purple);
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        .settings-btn {
-            background: var(--color-purple);
-            color: var(--color-bg);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .settings-btn:hover {
-            background: var(--color-pink);
-            box-shadow: 0 0 15px hsla(265, 89%, 78%, 0.5);
-        }
-        .status-card {
-            background: var(--color-bg);
-            padding: 24px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 2px solid var(--color-comment);
-            border-left: 4px solid var(--color-purple);
-        }
-        .status-ready {
-            border-left-color: var(--color-green);
-            background: hsla(135, 94%, 65%, 0.1);
-        }
-        .status-recording {
-            border-left-color: var(--color-red);
-            background: hsla(0, 100%, 67%, 0.1);
-            animation: pulse 1s infinite;
-        }
-        .status-error {
-            border-left-color: var(--color-yellow);
-            background: hsla(65, 92%, 76%, 0.1);
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-        .hotkey-display {
-            background: var(--color-bg);
-            border: 2px solid var(--color-cyan);
-            color: var(--color-cyan);
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            display: inline-block;
-            margin: 10px 0;
-            letter-spacing: 0.5px;
-        }
-        .recording-indicator {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        .feature {
-            padding: 24px;
-            border: 1px solid var(--color-comment);
-            border-radius: 8px;
-            text-align: center;
-            background: var(--color-bg);
-            transition: all 0.2s;
-        }
-        .feature:hover {
-            border-color: var(--color-purple);
-            box-shadow: 0 4px 12px hsla(265, 89%, 78%, 0.2);
-        }
-        .feature h3 {
-            color: var(--color-purple);
-            margin-top: 10px;
-        }
-        .feature-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        .instructions {
-            background: hsla(191, 97%, 77%, 0.1);
-            padding: 24px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 1px solid var(--color-cyan);
-        }
-        .instructions ol {
-            margin: 0;
-            padding-left: 24px;
-        }
-        .instructions li {
-            margin-bottom: 10px;
-        }
-        .test-controls {
-            background: var(--color-bg);
-            padding: 24px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 1px solid var(--color-comment);
-        }
-        .test-controls h3 {
-            margin-top: 0;
-            color: var(--color-purple);
-        }
-        .btn {
-            background: var(--color-green);
-            color: var(--color-bg);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            margin: 5px;
-            transition: all 0.2s;
-        }
-        .btn:hover {
-            background: hsl(135, 94%, 60%);
-            box-shadow: 0 0 15px hsla(135, 94%, 65%, 0.5);
-        }
-        .btn-secondary {
-            background: var(--color-comment);
-            color: var(--color-fg);
-        }
-        .btn-secondary:hover {
-            background: hsl(225, 27%, 56%);
-        }
-        .btn-danger {
-            background: var(--color-red);
-            color: var(--color-bg);
-        }
-        .btn-danger:hover {
-            background: hsl(0, 100%, 62%);
-            box-shadow: 0 0 15px hsla(0, 100%, 67%, 0.5);
-        }
-        .status-text {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .last-transcription {
-            background: var(--color-bg);
-            padding: 20px;
-            border-radius: 6px;
-            margin: 10px 0;
-            font-style: italic;
-            border-left: 3px solid var(--color-yellow);
-            border: 1px solid var(--color-comment);
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid var(--color-comment);
-            color: var(--color-comment);
-            font-size: 14px;
-        }
-        .footer a {
-            color: var(--color-cyan);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        .footer a:hover {
-            color: var(--color-purple);
-            text-decoration: underline;
-        }
-    </style>
+    <title>Speak - Voice Dictation</title>
+    <link rel="stylesheet" href="styles.built.css">
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎙️ Speak</h1>
-            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
-        </div>
+<body class="min-h-screen">
+    <!-- Main Container -->
+    <div class="drawer lg:drawer-open">
+        <!-- Drawer Toggle (Mobile) -->
+        <input id="drawer-toggle" type="checkbox" class="drawer-toggle" />
 
-        <p style="text-align: center; font-size: 18px; color: #666; margin-bottom: 30px;">
-            Your voice, your data, your control - Open source voice dictation for everyone
-        </p>
+        <!-- Main Content -->
+        <div class="drawer-content flex flex-col">
+            <!-- Navbar -->
+            <div class="navbar bg-base-100 border-b border-base-300">
+                <div class="flex-none lg:hidden">
+                    <label for="drawer-toggle" class="btn btn-square btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </label>
+                </div>
+                <div class="flex-1">
+                    <h1 class="text-2xl font-bold px-4">Welcome back</h1>
+                </div>
+                <div class="flex-none gap-2">
+                    <!-- Stats -->
+                    <div class="stats stats-horizontal shadow hidden md:inline-grid">
+                        <div class="stat py-2 px-4">
+                            <div class="stat-title text-xs">Streak</div>
+                            <div class="stat-value text-lg" id="streak-count">0 weeks</div>
+                        </div>
+                        <div class="stat py-2 px-4">
+                            <div class="stat-title text-xs">Words</div>
+                            <div class="stat-value text-lg" id="total-words">0</div>
+                        </div>
+                        <div class="stat py-2 px-4">
+                            <div class="stat-title text-xs">WPM</div>
+                            <div class="stat-value text-lg" id="wpm">0</div>
+                        </div>
+                    </div>
 
-        <div id="status-card" class="status-card status-ready">
-            <div class="status-text" id="status-text">🎯 Ready to Dictate</div>
-            <p id="status-description">Hold <span id="hotkey-display" class="hotkey-display">Ctrl + Hold</span> to start recording</p>
-        </div>
-
-        <div class="instructions">
-            <h3>🚀 How to Use Speak</h3>
-            <ol>
-                <li>Make sure your microphone is connected and permissions are granted</li>
-                <li>Hold the hotkey (<span id="hotkey-instruction">Ctrl</span>) to start recording</li>
-                <li>Speak clearly and naturally</li>
-                <li>Release the hotkey to stop recording and insert text</li>
-                <li>Text appears instantly at your cursor position</li>
-            </ol>
-        </div>
-
-        <div class="test-controls">
-            <h3>🧪 Test Controls</h3>
-            <p>Use these buttons to test the dictation system:</p>
-            <button class="btn" onclick="startRecording()" id="start-btn">🎙️ Start Recording</button>
-            <button class="btn btn-danger" onclick="stopRecording()" id="stop-btn" disabled>⏹️ Stop Recording</button>
-            <div id="test-status"></div>
-        </div>
-
-        <div id="last-transcription" class="last-transcription" style="display: none;">
-            <strong>Last transcription:</strong> <span id="transcription-text"></span>
-        </div>
-
-        <h2>✨ Key Features</h2>
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🎯</div>
-                <h3>Universal Dictation</h3>
-                <p>Works in any application via global hotkey. No app switching required.</p>
+                    <!-- Settings Button -->
+                    <button class="btn btn-ghost btn-circle" onclick="openSettings()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🛡️</div>
-                <h3>Privacy First</h3>
-                <p>Your voice is processed by OpenAI Whisper with end-to-end encryption.</p>
+
+            <!-- Hero Section with Hotkey Info -->
+            <div class="hero bg-base-200 py-8">
+                <div class="hero-content text-center">
+                    <div class="max-w-2xl">
+                        <div class="flex items-center justify-center gap-4 mb-4">
+                            <h2 class="text-lg font-normal">Hold down</h2>
+                            <kbd class="kbd kbd-lg font-mono" id="hotkey-display">⊞ Win + Ctrl + S</kbd>
+                            <h2 class="text-lg font-normal">to dictate in any app</h2>
+                        </div>
+                        <p class="text-sm opacity-70">
+                            Speak works in all your apps. Try it in email, messages, docs or anywhere else.
+                        </p>
+
+                        <!-- Recording Status -->
+                        <div id="recording-status" class="mt-6 hidden">
+                            <div class="alert alert-error recording-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span class="font-mono">🎙️ Recording... Release keys to stop</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🐧</div>
-                <h3>Cross-Platform</h3>
-                <p>Native support for Windows, macOS, and Linux distributions.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">⚡</div>
-                <h3>High Performance</h3>
-                <p>OpenAI Whisper models deliver excellent accuracy with low latency.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🔓</div>
-                <h3>Open Source</h3>
-                <p>Full transparency, community-driven, and self-hostable.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🌍</div>
-                <h3>Multi-Language</h3>
-                <p>Support for multiple languages with automatic detection.</p>
+
+            <!-- Timeline -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-4xl mx-auto">
+                    <!-- Today -->
+                    <div id="timeline-today" class="mb-8">
+                        <h3 class="text-sm font-semibold opacity-50 mb-4">TODAY</h3>
+                        <div class="space-y-3" id="today-transcriptions">
+                            <!-- Transcriptions will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Yesterday -->
+                    <div id="timeline-yesterday" class="mb-8 hidden">
+                        <h3 class="text-sm font-semibold opacity-50 mb-4">YESTERDAY</h3>
+                        <div class="space-y-3" id="yesterday-transcriptions">
+                            <!-- Transcriptions will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- This Week -->
+                    <div id="timeline-week" class="mb-8 hidden">
+                        <h3 class="text-sm font-semibold opacity-50 mb-4">THIS WEEK</h3>
+                        <div class="space-y-3" id="week-transcriptions">
+                            <!-- Transcriptions will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="text-center py-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto opacity-20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <h3 class="text-xl font-bold mb-2">No transcriptions yet</h3>
+                        <p class="opacity-70">Hold <span class="font-mono" id="empty-hotkey">⊞ Win + Ctrl + S</span> to create your first transcription</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="footer">
-            <p>
-                <a href="#" onclick="openExternal('https://github.com/namastexlabs/speak')">View on GitHub</a> |
-                <a href="#" onclick="openExternal('./docs/')">Documentation</a> |
-                <a href="#" onclick="openExternal('./docs/why-speak.md')">Why Speak?</a>
-            </p>
-            <p>Speak is free, open source, and built for the future of voice interaction.</p>
-        </div>
-    </div>
+        <!-- Sidebar -->
+        <div class="drawer-side">
+            <label for="drawer-toggle" class="drawer-overlay"></label>
+            <aside class="bg-base-200 w-80 h-full flex flex-col">
+                <!-- Logo/Brand -->
+                <div class="p-6 border-b border-base-300">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-primary text-primary-content rounded-full w-12">
+                                <span class="text-2xl">🎙️</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">Speak</h2>
+                            <p class="text-xs opacity-60">Voice Dictation</p>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="recording-indicator" id="recording-indicator">
-        🎙️ Recording...
+                <!-- Navigation -->
+                <ul class="menu p-4 flex-1">
+                    <li><a class="active">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Home
+                    </a></li>
+                    <li><a onclick="openSettings()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Settings
+                    </a></li>
+                </ul>
+
+                <!-- Footer -->
+                <div class="p-4 border-t border-base-300">
+                    <div class="text-xs opacity-60 text-center">
+                        <p>Open Source</p>
+                        <a href="#" onclick="openExternal('https://github.com/namastexlabs/speak')" class="link link-hover">View on GitHub</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
     </div>
 
     <script src="audio-bridge.js"></script>
-    <script src="main.js"></script>
+    <script src="timeline.js"></script>
 </body>
 </html>
