@@ -55,11 +55,62 @@ jobs:
           path: dist-build/${{ matrix.artifact }}
           retention-days: 7
 
+      - name: Generate Release Notes
+        if: startsWith(github.ref, 'refs/tags/')
+        id: release_notes
+        run: |
+          # Get the current tag
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Current tag: $CURRENT_TAG"
+
+          # Get the previous tag
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$' | grep -v "$CURRENT_TAG" | head -n 1)
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "No previous tag found, using initial commit"
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          echo "Comparing $PREVIOUS_TAG...$CURRENT_TAG"
+
+          # Generate release notes
+          cat > release_notes.md <<'EOF'
+          ## 📦 Installation
+
+          Download the appropriate file for your platform:
+          - **Windows**: `Speak.Setup.*.exe`
+          - **macOS**: `Speak-*-arm64.dmg`
+          - **Linux**: `Speak-*.AppImage`
+
+          ## 🔄 Changes in this Release
+
+          ### Commits
+          EOF
+
+          # Add commit messages
+          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..$CURRENT_TAG >> release_notes.md
+
+          echo "" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### 📊 File Changes" >> release_notes.md
+
+          # Add file statistics
+          git diff --stat $PREVIOUS_TAG..$CURRENT_TAG >> release_notes.md
+
+          echo "" >> release_notes.md
+          echo "---" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...$CURRENT_TAG" >> release_notes.md
+
+          # Output for next step
+          echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: dist-build/${{ matrix.artifact }}
+          body_path: ${{ steps.release_notes.outputs.notes_file }}
           draft: false
           prerelease: false
           make_latest: true
