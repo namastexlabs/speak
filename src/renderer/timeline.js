@@ -166,6 +166,9 @@ function setupEventListeners() {
     ipcRenderer.on('hotkey-start-recording', async () => {
         showRecordingStatus();
         await startRecording(true); // fromHotkey = true
+        if (!window.audioBridge?.isRecording) {
+            hideRecordingStatus();
+        }
     });
 
     ipcRenderer.on('hotkey-stop-recording', async () => {
@@ -201,6 +204,7 @@ async function stopRecording(fromHotkey = false) {
         }
     } catch (error) {
         console.error('Failed to stop recording:', error);
+        hideRecordingStatus();
     }
 }
 

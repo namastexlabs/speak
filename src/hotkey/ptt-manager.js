@@ -239,7 +239,7 @@ class PTTManager {
   }
 
   isModifierActive(keyCode, currentMask) {
-    if (MODIFIER_MASKS.has(keyCode) && currentMask != null) {
+    if (MODIFIER_MASKS.has(keyCode) && typeof currentMask === 'number') {
       const maskBit = MODIFIER_MASKS.get(keyCode);
       return (currentMask & maskBit) !== 0;
     }
@@ -247,7 +247,7 @@ class PTTManager {
   }
 
   syncModifierState(currentMask) {
-    if (currentMask == null) {
+    if (typeof currentMask !== 'number') {
       return;
     }
 
