@@ -7,7 +7,13 @@ const { ipcRenderer } = require('electron');
 document.addEventListener('DOMContentLoaded', () => {
     initializeTabs();
     loadSettings();
-    updateHotkeyDisplay();
+
+    // Set up hotkey event listeners after DOM is ready
+    const hotkeyInput = document.getElementById('hotkey-modifier');
+    if (hotkeyInput) {
+        hotkeyInput.addEventListener('input', updateHotkeyDisplay);
+        hotkeyInput.addEventListener('change', updateHotkeyDisplay);
+    }
 });
 
 function initializeTabs() {
@@ -58,17 +64,23 @@ async function loadSettings() {
             document.getElementById('theme').value = settings.theme;
         }
 
-        // Update hotkey display
+        // Update hotkey display after loading settings
         updateHotkeyDisplay();
     } catch (error) {
         console.error('Failed to load settings:', error);
-        showStatus('general-status', 'Failed to load settings: ' + error.message, 'error');
+        showStatus('api-status', 'Failed to load settings: ' + error.message, 'error');
     }
 }
 
 // Update hotkey display
 function updateHotkeyDisplay() {
-    const hotkey = document.getElementById('hotkey-modifier').value;
+    const hotkeyInput = document.getElementById('hotkey-modifier');
+    const hotkeyDisplay = document.getElementById('current-hotkey');
+
+    if (!hotkeyInput || !hotkeyDisplay) return;
+
+    const hotkey = hotkeyInput.value || 'Control+R';
+
     // Handle both simple (e.g., "R") and complex (e.g., "Super+Control+S") hotkey formats
     let display;
     if (hotkey.includes('+')) {
@@ -83,12 +95,8 @@ function updateHotkeyDisplay() {
         // Simple format (legacy)
         display = (hotkey === 'Command' ? '⌘' : hotkey) + ' + Hold';
     }
-    document.getElementById('current-hotkey').textContent = display;
+    hotkeyDisplay.textContent = display;
 }
-
-// Event listeners for hotkey changes
-document.getElementById('hotkey-modifier').addEventListener('input', updateHotkeyDisplay);
-document.getElementById('hotkey-modifier').addEventListener('change', updateHotkeyDisplay);
 
 // API Key functions
 async function testApiKey() {
