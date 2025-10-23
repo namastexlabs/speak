@@ -41,8 +41,22 @@ class SettingsManager {
   constructor() {
     this.store = store;
     this.openai = null;
+    this.migrateOldHotkeys();
     this.loadEnvApiKey();
     this.initializeOpenAI();
+  }
+
+  // Migrate old hotkey formats that included letter keys
+  migrateOldHotkeys() {
+    const currentHotkey = store.get('hotkey');
+
+    // Check if hotkey contains any letter keys (like 'S', 'R', etc.)
+    if (currentHotkey && /\+[A-Z]$/i.test(currentHotkey)) {
+      console.log(`Migrating old hotkey format: ${currentHotkey}`);
+      const defaultHotkey = process.platform === 'darwin' ? 'Command+Control' : 'Super+Control';
+      store.set('hotkey', defaultHotkey);
+      console.log(`Updated to: ${defaultHotkey}`);
+    }
   }
 
   // Load API key from .env file if present and no key is stored
