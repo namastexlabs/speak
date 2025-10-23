@@ -24,16 +24,16 @@
     "cross-platform",
     "privacy-first"
   ],
-  "author": "Speak Team",
+  "author": "Namastex Labs <hello@namastex.ai>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/speak.git"
+    "url": "https://github.com/namastexlabs/speak.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/speak/issues"
+    "url": "https://github.com/namastexlabs/speak/issues"
   },
-  "homepage": "https://github.com/yourusername/speak#readme",
+  "homepage": "https://github.com/namastexlabs/speak#readme",
   "dependencies": {
     "openai": "^4.20.1",
     "electron-store": "^8.1.1",

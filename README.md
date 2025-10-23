@@ -6,7 +6,15 @@
 
 ## Overview
 
-Speak is an open-source voice dictation application that puts **you in control** of your data and workflow. Unlike closed-source alternatives, Speak offers complete transparency, local-first processing, and true cross-platform support including Linux.
+Speak is an **open-source voice dictation application** built by [Namastex Labs](https://github.com/namastexlabs) that puts **you in control** of your data and workflow. Unlike closed-source alternatives like Wispr Flow, Speak offers complete transparency, privacy-first architecture, and true cross-platform support including Linux.
+
+**What is Speak?**
+- 🎤 Universal voice-to-text dictation that works in any application
+- 🔓 Open source with full transparency in code and data handling
+- 🛡️ Privacy-first: your voice data stays local by default
+- 🐧 Native support for Windows, macOS, **and Linux**
+- ⚡ Powered by OpenAI Whisper for high-accuracy transcription (>95%)
+- 🆓 Unlimited usage - no artificial word limits
 
 ### Why Choose Speak?
 
@@ -48,7 +56,7 @@ See [Roadmap](./docs/roadmap.md) for detailed development plan and feature statu
 
 ```bash
 # Clone and run
-git clone https://github.com/yourusername/speak.git
+git clone https://github.com/namastexlabs/speak.git
 cd speak
 ./run.sh
 ```
@@ -61,7 +69,7 @@ That's it! The script will:
 
 **Manual setup (if you prefer):**
 
-1. Clone repository: `git clone https://github.com/yourusername/speak.git`
+1. Clone repository: `git clone https://github.com/namastexlabs/speak.git`
 2. Install dependencies: `npm install`
 3. Install system dependencies: `./install.sh` (for audio recording)
 4. Generate icons: `npm run generate-icons`
@@ -109,7 +117,7 @@ npm start
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/speak.git
+git clone https://github.com/namastexlabs/speak.git
 cd speak
 
 # Quick start (handles everything)
@@ -251,8 +259,8 @@ genie wish "Add support for custom voice commands"
 ### Reporting Issues
 
 Found a bug? Have a feature request?
-- [Open an issue](https://github.com/yourusername/speak/issues)
-- Join our [Discussions](https://github.com/yourusername/speak/discussions)
+- [Open an issue](https://github.com/namastexlabs/speak/issues)
+- Join our [Discussions](https://github.com/namastexlabs/speak/discussions)
 
 ## License
 
@@ -280,19 +288,19 @@ While inspired by Flow's innovative approach, Speak addresses key limitations:
 ## Support
 
 - **Documentation**: See `.genie/product/` folder
-- **Issues**: [GitHub Issues](https://github.com/yourusername/speak/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/speak/discussions)
+- **Issues**: [GitHub Issues](https://github.com/namastexlabs/speak/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/namastexlabs/speak/discussions)
 
 ---
 
-**Status**: 🚧 Phase 1 Development - MVP coming Q4 2025
+**Status**: ✅ Phase 1 MVP - Production Ready (v0.1.0)
 
 ## Get Involved
 
-- **[⭐ Star on GitHub](https://github.com/yourusername/speak)** - Show your support
+- **[⭐ Star on GitHub](https://github.com/namastexlabs/speak)** - Show your support
 - **[📖 Read the Docs](./docs/)** - Learn about Speak's unique advantages
-- **[🐛 Report Issues](https://github.com/yourusername/speak/issues)** - Help improve Speak
-- **[💬 Join Discussions](https://github.com/yourusername/speak/discussions)** - Connect with the community
+- **[🐛 Report Issues](https://github.com/namastexlabs/speak/issues)** - Help improve Speak
+- **[💬 Join Discussions](https://github.com/namastexlabs/speak/discussions)** - Connect with the community
 
 ## Stay Updated
 
