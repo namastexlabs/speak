@@ -21,7 +21,6 @@ const settingsManager = require('./config/settings');
 const audioRecorder = require('./audio/recorder');
 const whisperTranscriber = require('./transcription/whisper');
 const textInserter = require('./insertion/text-inserter');
-const hotkeyManager = require('./hotkey/manager');
 const pttManager = require('./hotkey/ptt-manager');
 const transcriptionHistory = require('./config/history');
 const SystemTray = require('./ui/tray');
@@ -197,7 +196,23 @@ function setupIPCHandlers() {
   // Hotkey handlers
   ipcMain.handle('update-hotkey', async (event, modifier) => {
     try {
-      const result = hotkeyManager.updateHotkey(modifier);
+      // Stop current PTT manager
+      pttManager.stop();
+
+      // Restart PTT manager with new hotkey
+      const pttCallback = (action) => {
+        if (mainWindow && mainWindow.webContents) {
+          if (action === 'start') {
+            mainWindow.webContents.send('hotkey-start-recording');
+          } else if (action === 'stop') {
+            mainWindow.webContents.send('hotkey-stop-recording');
+          }
+        }
+      };
+
+      const result = pttManager.start(modifier, pttCallback);
+      console.log(`PTT hotkey updated to: ${modifier}`);
+
       return result;
     } catch (error) {
       return errorHandler.handleError(error, { handler: 'update-hotkey', modifier });
@@ -359,27 +374,6 @@ function setupIPCHandlers() {
   });
 }
 
-// Set up hotkey callbacks
-function setupHotkeyCallbacks() {
-  hotkeyManager.setRecordingCallback(async (action) => {
-    try {
-      if (action === 'start') {
-        // Trigger recording start via renderer
-        if (mainWindow && mainWindow.webContents) {
-          mainWindow.webContents.send('hotkey-start-recording');
-        }
-      } else if (action === 'stop') {
-        // Trigger recording stop via renderer
-        if (mainWindow && mainWindow.webContents) {
-          mainWindow.webContents.send('hotkey-stop-recording');
-        }
-      }
-    } catch (error) {
-      errorHandler.handleError(error, { context: 'hotkey-callback', action });
-    }
-  });
-}
-
 // App event handlers
 app.whenReady().then(async () =>{
   // Set up permission handlers for media devices (MUST be before creating windows)
@@ -465,14 +459,6 @@ app.on('before-quit', () => {
   errorHandler.cleanup();
 });
 
-// Handle app-level events
-app.on('browser-window-focus', () => {
-  // Re-register hotkey if needed
-  if (!hotkeyManager.isRegistered && mainWindow) {
-    const currentHotkey = settingsManager.getAll().hotkey;
-    hotkeyManager.registerHotkey(currentHotkey, hotkeyManager.recordingCallback);
-  }
-});
 
 // Microphone permissions are handled automatically by Web Audio API
 // The browser will prompt when getUserMedia() is called in the renderer process

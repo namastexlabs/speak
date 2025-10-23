@@ -31,6 +31,10 @@ class PTTManager {
 
     console.log('Starting PTT with keys:', JSON.stringify(this.requiredKeys));
 
+    // Remove all existing listeners to prevent duplicates
+    uIOhook.removeAllListeners('keydown');
+    uIOhook.removeAllListeners('keyup');
+
     // Set up key event listeners
     uIOhook.on('keydown', (event) => {
       this.handleKeyDown(event);
@@ -245,6 +249,10 @@ class PTTManager {
       clearTimeout(this.holdTimer);
       this.holdTimer = null;
     }
+
+    // Remove event listeners
+    uIOhook.removeAllListeners('keydown');
+    uIOhook.removeAllListeners('keyup');
 
     // Stop uiohook
     uIOhook.stop();
