@@ -69,6 +69,35 @@ jobs:
           # Output for later steps
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Commit Version Bump
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git add package.json pnpm-lock.yaml 2>/dev/null || git add package.json
+
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: bump version to v${VERSION} [skip ci]"
+            git push origin main
+            echo "✅ Committed and pushed version bump to main"
+          fi
+
+      - name: Create Git Tag and Trigger Build
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Check if tag already exists
+          if git ls-remote --tags origin | grep -q "refs/tags/v${VERSION}"; then
+            echo "⚠️  Tag v${VERSION} already exists, skipping tag creation"
+          else
+            # Tag the commit that has the version bump
+            git tag "v${VERSION}"
+            git push origin "v${VERSION}"
+            echo "✅ Created tag v${VERSION} on commit with version bump"
+            echo "🔨 build-releases.yml will create release with executables"
+          fi
+
       - name: Publish to npm
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -80,28 +109,9 @@ jobs:
           fi
 
           pnpm publish --tag next --access public --no-git-checks
+          echo "✅ Published @namastexlabs/speak@${VERSION} to npm"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create Git Tag and Trigger Build
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-
-          # Check if tag already exists
-          if git ls-remote --tags origin | grep -q "refs/tags/v${VERSION}"; then
-            echo "⚠️  Tag v${VERSION} already exists, skipping tag creation"
-          else
-            git tag "v${VERSION}"
-            git push origin "v${VERSION}"
-            echo "✅ Created tag v${VERSION} - build-releases.yml will create release with executables"
-          fi
-
-      - name: Commit Version Bump
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          git add package.json pnpm-lock.yaml 2>/dev/null || git add package.json
-          git commit -m "chore: bump version to v${VERSION} [skip ci]" || echo "No changes to commit"
-          git push origin main || echo "Nothing to push"
 
       - name: Notify Success
         if: success()
