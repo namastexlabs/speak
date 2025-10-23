@@ -17,6 +17,7 @@ pnpm-lock.yaml
 
 # Build outputs
 dist/
+dist-build/
 build/
 out/
 .cache/
