@@ -64,7 +64,34 @@ else
     echo "✅ pnpm $(pnpm --version)"
 fi
 
-# 3. Install npm dependencies (if needed)
+# 3. Check for updates and auto-update if available
+CURRENT_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")
+echo "📍 Current version: $CURRENT_VERSION"
+
+# Get latest @next version from npm (silent, fast)
+LATEST_VERSION=$(npm view @namastexlabs/speak@next version 2>/dev/null || echo "$CURRENT_VERSION")
+
+# Compare versions
+if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🎤 ✨ UPDATE AVAILABLE"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Current: $CURRENT_VERSION"
+    echo "Latest:  $LATEST_VERSION"
+    echo ""
+    echo "Updating Speak..."
+
+    # Fetch latest from git
+    git fetch origin main
+    git reset --hard origin/main
+
+    echo ""
+    echo "✅ Updated to $LATEST_VERSION"
+    echo ""
+fi
+
+# 4. Install npm dependencies (if needed)
 if [ ! -d "node_modules" ]; then
     echo "📦 Installing dependencies..."
     pnpm install
