@@ -83,7 +83,7 @@ try {
     $LATEST_VERSION = $CURRENT_VERSION
 }
 
-# Compare versions
+# Compare versions and notify if update available
 if ($CURRENT_VERSION -ne $LATEST_VERSION) {
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "🎤 ✨ UPDATE AVAILABLE" -ForegroundColor Cyan
@@ -92,14 +92,9 @@ if ($CURRENT_VERSION -ne $LATEST_VERSION) {
     Write-Host "Current: $CURRENT_VERSION" -ForegroundColor White
     Write-Host "Latest:  $LATEST_VERSION" -ForegroundColor White
     Write-Host ""
-    Write-Host "Updating Speak..." -ForegroundColor Yellow
-
-    # Fetch latest from git
-    git fetch origin main
-    git reset --hard origin/main
-
+    Write-Host "Update with: npx @namastexlabs/speak@next" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "✅ Updated to $LATEST_VERSION" -ForegroundColor Green
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host ""
 }
 

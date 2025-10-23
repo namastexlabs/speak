@@ -64,14 +64,14 @@ else
     echo "✅ pnpm $(pnpm --version)"
 fi
 
-# 3. Check for updates and auto-update if available
+# 3. Version info and update check
 CURRENT_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")
 echo "📍 Current version: $CURRENT_VERSION"
 
 # Get latest @next version from npm (silent, fast)
 LATEST_VERSION=$(npm view @namastexlabs/speak@next version 2>/dev/null || echo "$CURRENT_VERSION")
 
-# Compare versions
+# Compare versions and notify if update available
 if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "🎤 ✨ UPDATE AVAILABLE"
@@ -80,14 +80,9 @@ if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
     echo "Current: $CURRENT_VERSION"
     echo "Latest:  $LATEST_VERSION"
     echo ""
-    echo "Updating Speak..."
-
-    # Fetch latest from git
-    git fetch origin main
-    git reset --hard origin/main
-
+    echo "Update with: npx @namastexlabs/speak@next"
     echo ""
-    echo "✅ Updated to $LATEST_VERSION"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 fi
 

@@ -3,6 +3,9 @@
   "version": "0.1.0-rc.3",
   "description": "Open source voice dictation for everyone",
   "main": "src/main.js",
+  "bin": {
+    "speak": "./run.sh"
+  },
   "scripts": {
     "start": "electron src/main.js",
     "dev": "NODE_ENV=development electron src/main.js",
