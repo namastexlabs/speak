@@ -60,12 +60,15 @@ class PTTManagerV3 {
 
   /**
    * Convert our hotkey format to Electron format
-   * Super+Control → CommandOrControl+Super (Windows: Ctrl+Win, Mac: Cmd+Ctrl)
+   * Super+Control → Super+Ctrl on Windows (Win+Ctrl), Cmd+Ctrl on Mac
    */
   convertHotkey(hotkey) {
-    // Electron format: Modifier+Key
-    // Available modifiers: Command (or Cmd), Control (or Ctrl), CommandOrControl (or CmdOrCtrl),
-    //                      Alt, Option, AltGr, Shift, Super
+    console.log(`PTT V3: Converting hotkey "${hotkey}" on platform: ${process.platform}`);
+
+    // Electron globalShortcut uses different format than our settings
+    // Our format: "Super+Control"
+    // Electron Windows: "Super+Ctrl" (Win key + Ctrl)
+    // Electron Mac: "Cmd+Ctrl"
 
     const parts = hotkey.split('+').map(p => p.trim());
     const electronParts = [];
@@ -73,15 +76,19 @@ class PTTManagerV3 {
     for (const part of parts) {
       switch (part) {
         case 'Super':
-          // On Windows: Windows key, On Mac: Cmd key
-          electronParts.push(process.platform === 'darwin' ? 'Cmd' : 'Super');
+          // On Windows: Super (Win key), On Mac: Cmd
+          if (process.platform === 'darwin') {
+            electronParts.push('Command');
+          } else {
+            electronParts.push('Super');
+          }
           break;
         case 'Command':
-          electronParts.push('Cmd');
+          electronParts.push('Command');
           break;
         case 'Control':
         case 'Ctrl':
-          electronParts.push('Ctrl');
+          electronParts.push('Control');
           break;
         case 'Alt':
           electronParts.push('Alt');
@@ -94,7 +101,9 @@ class PTTManagerV3 {
       }
     }
 
-    return electronParts.join('+');
+    const result = electronParts.join('+');
+    console.log(`PTT V3: Converted to Electron format: "${result}"`);
+    return result;
   }
 
   /**

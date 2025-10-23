@@ -189,10 +189,7 @@ function showLastTranscription(text) {
     }, 10000);
 }
 
-// Open settings window
-function openSettings(options = {}) {
-    ipcRenderer.invoke('open-settings', options);
-}
+// openSettings is now defined in settings-modal.js (modal dialog instead of separate window)
 
 // Open external URL
 function openExternal(url) {
@@ -224,7 +221,7 @@ window.addEventListener('focus', () => {
 });
 
 // Export functions for global access (needed for onclick handlers)
-window.openSettings = openSettings;
+// Note: window.openSettings is defined in settings-modal.js
 window.openExternal = openExternal;
 window.startRecording = startRecording;
 window.stopRecording = stopRecording;
