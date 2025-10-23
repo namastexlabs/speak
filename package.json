@@ -22,7 +22,7 @@
     "check-deps": "node scripts/check-deps.js",
     "validate": "pnpm run check-deps && pnpm run lint"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@10.19.0",
   "keywords": [
     "voice-dictation",
     "speech-to-text",
