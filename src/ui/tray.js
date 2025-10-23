@@ -41,20 +41,19 @@ class SystemTray {
 
   // Get appropriate tray icon based on platform and state
   getTrayIcon() {
-    const iconName = this.isRecording ? 'tray-recording.png' : 'tray-normal.png';
+    const iconName = this.isRecording ? 'tray-recording.svg' : 'tray-normal.svg';
 
     // Try to find icon in different locations
     const possiblePaths = [
       path.join(__dirname, '../../assets/icons', iconName),
       path.join(__dirname, '../assets/icons', iconName),
       path.join(process.resourcesPath, 'assets/icons', iconName),
-      // Fallback to a simple text-based icon
     ];
 
     for (const iconPath of possiblePaths) {
       try {
         if (require('fs').existsSync(iconPath)) {
-          return iconPath;
+          return nativeImage.createFromPath(iconPath);
         }
       } catch (error) {
         // Continue to next path

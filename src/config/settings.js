@@ -14,7 +14,7 @@ const store = new Store({
     },
     hotkey: {
       type: 'string',
-      default: process.platform === 'darwin' ? 'Command' : 'Control'
+      default: 'R'
     },
     language: {
       type: 'string',
