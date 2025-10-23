@@ -17,7 +17,7 @@ const store = new Store({
     },
     hotkey: {
       type: 'string',
-      default: 'Super+Control+S'
+      default: process.platform === 'darwin' ? 'Command+Control' : 'Super+Control'
     },
     language: {
       type: 'string',

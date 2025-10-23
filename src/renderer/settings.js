@@ -79,9 +79,9 @@ function updateHotkeyDisplay() {
 
     if (!hotkeyInput || !hotkeyDisplay) return;
 
-    const hotkey = hotkeyInput.value || 'Control+R';
+    const hotkey = hotkeyInput.value || (process.platform === 'darwin' ? 'Command+Control' : 'Super+Control');
 
-    // Handle both simple (e.g., "R") and complex (e.g., "Super+Control+S") hotkey formats
+    // Handle modifier combinations
     let display;
     if (hotkey.includes('+')) {
         // Complex format - show as-is with friendly names
