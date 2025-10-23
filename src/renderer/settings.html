@@ -1,305 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="luxury">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speak - Settings</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #0a0a0a;
-            color: #e0e0e0;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-        .header {
-            padding: 24px 24px 16px;
-            border-bottom: 1px solid #1a1a1a;
-        }
-        .header h1 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-        .header p {
-            margin: 0;
-            font-size: 13px;
-            color: #808080;
-        }
-        .tabs {
-            display: flex;
-            padding: 0 24px;
-            gap: 16px;
-            border-bottom: 1px solid #1a1a1a;
-        }
-        .tab {
-            padding: 12px 0;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-            font-size: 13px;
-            color: #808080;
-        }
-        .tab:hover {
-            color: #b0b0b0;
-        }
-        .tab.active {
-            border-bottom-color: #ffffff;
-            color: #ffffff;
-        }
-        .tab-content {
-            display: none;
-            padding: 24px;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .tab-content h2 {
-            margin: 0 0 8px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-        .tab-content > p {
-            margin: 0 0 24px;
-            font-size: 13px;
-            color: #808080;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #b0b0b0;
-        }
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 8px 12px;
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 6px;
-            font-size: 13px;
-            color: #e0e0e0;
-            font-family: inherit;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #404040;
-            background: #252525;
-        }
-        .form-group input::placeholder {
-            color: #606060;
-        }
-        .form-group small {
-            display: block;
-            margin-top: 6px;
-            font-size: 12px;
-            color: #606060;
-        }
-        .form-group small a {
-            color: #909090;
-            text-decoration: underline;
-        }
-        .button-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 24px;
-        }
-        .btn {
-            padding: 8px 16px;
-            border: 1px solid #2a2a2a;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-        .btn-primary {
-            background: #ffffff;
-            color: #0a0a0a;
-            border-color: #ffffff;
-        }
-        .btn-primary:hover {
-            background: #e0e0e0;
-            border-color: #e0e0e0;
-        }
-        .btn-secondary {
-            background: transparent;
-            color: #b0b0b0;
-        }
-        .btn-secondary:hover {
-            background: #1a1a1a;
-            color: #e0e0e0;
-        }
-        .status {
-            margin-top: 12px;
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            border: 1px solid;
-        }
-        .status.success {
-            background: rgba(34, 139, 34, 0.1);
-            color: #5cb85c;
-            border-color: rgba(34, 139, 34, 0.3);
-        }
-        .status.error {
-            background: rgba(220, 53, 69, 0.1);
-            color: #e57373;
-            border-color: rgba(220, 53, 69, 0.3);
-        }
-        .status.info {
-            background: rgba(91, 155, 213, 0.1);
-            color: #64b5f6;
-            border-color: rgba(91, 155, 213, 0.3);
-        }
-        .hotkey-display {
-            background: #1a1a1a;
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
-            font-weight: 500;
-            display: inline-block;
-            margin-top: 8px;
-            border: 1px solid #2a2a2a;
-            color: #ffffff;
-            font-size: 14px;
-        }
-        .back-link {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            color: #808080;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.2s;
-        }
-        .back-link:hover {
-            color: #b0b0b0;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.built.css">
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <a href="#" class="back-link" onclick="goBack()">&larr; Back to Speak</a>
-            <h1>⚙️ Settings</h1>
-            <p>Configure Speak for your voice dictation needs</p>
+<body class="min-h-screen bg-base-100">
+    <!-- Main Container -->
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="navbar bg-base-200 border-b border-base-300">
+            <div class="flex-1">
+                <button class="btn btn-ghost btn-sm" onclick="goBack()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back
+                </button>
+                <h1 class="text-2xl font-bold ml-4">⚙️ Settings</h1>
+            </div>
         </div>
 
-        <div class="tabs">
-            <div class="tab active" data-tab="api">API Key</div>
-            <div class="tab" data-tab="audio">Audio</div>
-            <div class="tab" data-tab="hotkey">Hotkey</div>
-            <div class="tab" data-tab="general">General</div>
+        <!-- Tabs -->
+        <div class="tabs tabs-boxed bg-base-200 p-4">
+            <a class="tab tab-active" data-tab="api">API Key</a>
+            <a class="tab" data-tab="audio">Audio</a>
+            <a class="tab" data-tab="hotkey">Hotkey</a>
+            <a class="tab" data-tab="general">General</a>
         </div>
 
-        <div id="api-tab" class="tab-content active">
-            <h2>OpenAI API Configuration</h2>
-            <div class="form-group">
-                <label for="api-key">API Key</label>
-                <input type="password" id="api-key" placeholder="sk-...">
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
-                </small>
+        <!-- Tab Content -->
+        <div class="p-6">
+            <!-- API Tab -->
+            <div id="api-tab" class="tab-content">
+                <div class="card bg-base-200 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title">OpenAI API Configuration</h2>
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">API Key</span>
+                            </label>
+                            <input type="password" id="api-key" placeholder="sk-..." class="input input-bordered w-full" />
+                            <label class="label">
+                                <span class="label-text-alt">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" class="link link-hover">OpenAI Platform</a></span>
+                            </label>
+                        </div>
+                        <div class="card-actions justify-end mt-4">
+                            <button class="btn btn-secondary" onclick="testApiKey()">Test Connection</button>
+                            <button class="btn btn-primary" onclick="saveApiKey()">Save API Key</button>
+                        </div>
+                        <div id="api-status"></div>
+                    </div>
+                </div>
             </div>
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="testApiKey()">Test Connection</button>
-                <button class="btn btn-secondary" onclick="saveApiKey()">Save API Key</button>
-            </div>
-            <div id="api-status"></div>
-        </div>
 
-        <div id="audio-tab" class="tab-content">
-            <h2>Audio Device Settings</h2>
-            <div class="form-group">
-                <label for="audio-device">Microphone Device</label>
-                <select id="audio-device">
-                    <option value="default">Default System Microphone</option>
-                </select>
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Choose your preferred microphone for voice dictation
-                </small>
+            <!-- Audio Tab -->
+            <div id="audio-tab" class="tab-content hidden">
+                <div class="card bg-base-200 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title">Audio Device Settings</h2>
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">Microphone Device</span>
+                            </label>
+                            <select id="audio-device" class="select select-bordered w-full">
+                                <option value="default">Default System Microphone</option>
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt">Choose your preferred microphone for voice dictation</span>
+                            </label>
+                        </div>
+                        <div class="card-actions justify-end mt-4">
+                            <button class="btn btn-primary" onclick="saveAudioSettings()">Save Audio Settings</button>
+                        </div>
+                        <div id="audio-status"></div>
+                    </div>
+                </div>
             </div>
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="saveAudioSettings()">Save Audio Settings</button>
-            </div>
-            <div id="audio-status"></div>
-        </div>
 
-        <div id="hotkey-tab" class="tab-content">
-            <h2>Global Hotkey</h2>
-            <p>Current hotkey to start/stop voice recording:</p>
-            <div class="form-group">
-                <label>Active Hotkey</label>
-                <div class="hotkey-display" id="current-hotkey">⊞ Win + Ctrl + S</div>
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Press once to start recording, press again to stop and transcribe
-                </small>
-            </div>
-            <div class="form-group">
-                <label for="hotkey-modifier">Custom Hotkey (Advanced)</label>
-                <input type="text" id="hotkey-modifier" placeholder="Super+Control+S">
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Format: Modifier+Modifier+Key (e.g., Super+Control+S for Win+Ctrl+S)
-                </small>
-            </div>
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="saveHotkeySettings()">Save Hotkey Settings</button>
-            </div>
-            <div id="hotkey-status"></div>
-        </div>
+            <!-- Hotkey Tab -->
+            <div id="hotkey-tab" class="tab-content hidden">
+                <div class="card bg-base-200 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title">Global Hotkey</h2>
+                        <p class="text-sm opacity-70 mb-4">Current hotkey to start/stop voice recording:</p>
 
-        <div id="general-tab" class="tab-content">
-            <h2>General Settings</h2>
-            <div class="form-group">
-                <label for="language">Language</label>
-                <select id="language">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
-                    <option value="it">Italian</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ru">Russian</option>
-                    <option value="ja">Japanese</option>
-                    <option value="ko">Korean</option>
-                    <option value="zh">Chinese</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="theme">Theme</label>
-                <select id="theme">
-                    <option value="system">System Default</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
-            </div>
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="saveGeneralSettings()">Save General Settings</button>
-            </div>
-            <div id="general-status"></div>
-        </div>
-    </div>
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">Active Hotkey</span>
+                            </label>
+                            <kbd class="kbd kbd-lg" id="current-hotkey">⊞ Win + Ctrl + S</kbd>
+                            <label class="label">
+                                <span class="label-text-alt">Hold down to start recording, release to stop and transcribe</span>
+                            </label>
+                        </div>
 
-    <div class="recording-indicator" id="recording-indicator">
-        🎙️ Recording...
+                        <div class="form-control w-full mt-4">
+                            <label class="label">
+                                <span class="label-text">Custom Hotkey (Advanced)</span>
+                            </label>
+                            <input type="text" id="hotkey-modifier" placeholder="Control+R" class="input input-bordered w-full" />
+                            <label class="label">
+                                <span class="label-text-alt">Format: Modifier+Modifier+Key (e.g., Control+R)</span>
+                            </label>
+                        </div>
+
+                        <div class="card-actions justify-end mt-4">
+                            <button class="btn btn-primary" onclick="saveHotkeySettings()">Save Hotkey Settings</button>
+                        </div>
+                        <div id="hotkey-status"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Tab -->
+            <div id="general-tab" class="tab-content hidden">
+                <div class="card bg-base-200 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title">General Settings</h2>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">Language</span>
+                            </label>
+                            <select id="language" class="select select-bordered w-full">
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="it">Italian</option>
+                                <option value="pt">Portuguese</option>
+                                <option value="ru">Russian</option>
+                                <option value="ja">Japanese</option>
+                                <option value="ko">Korean</option>
+                                <option value="zh">Chinese</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control w-full mt-4">
+                            <label class="label">
+                                <span class="label-text">Theme</span>
+                            </label>
+                            <select id="theme" class="select select-bordered w-full">
+                                <option value="luxury">Luxury (Default)</option>
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+
+                        <div class="card-actions justify-end mt-4">
+                            <button class="btn btn-primary" onclick="saveGeneralSettings()">Save General Settings</button>
+                        </div>
+                        <div id="general-status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="settings.js"></script>

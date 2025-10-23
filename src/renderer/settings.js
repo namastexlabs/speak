@@ -14,14 +14,16 @@ function initializeTabs() {
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // Remove active class from all tabs and content
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-active'));
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
 
-            // Add active class to clicked tab and corresponding content
-            tab.classList.add('active');
+            // Add active class to clicked tab
+            tab.classList.add('tab-active');
+            // Show corresponding tab content
             const tabId = tab.getAttribute('data-tab');
-            document.getElementById(tabId + '-tab').classList.add('active');
+            document.getElementById(tabId + '-tab').classList.remove('hidden');
         });
     });
 }
@@ -163,14 +165,22 @@ async function saveGeneralSettings() {
 // Utility function to show status messages
 function showStatus(elementId, message, type) {
     const statusElement = document.getElementById(elementId);
-    statusElement.className = 'status ' + type;
+
+    // Map type to DaisyUI alert classes
+    const alertClass = {
+        'success': 'alert alert-success',
+        'error': 'alert alert-error',
+        'info': 'alert alert-info'
+    }[type] || 'alert';
+
+    statusElement.className = alertClass + ' mt-4';
     statusElement.textContent = message;
-    statusElement.style.display = 'block';
+    statusElement.classList.remove('hidden');
 
     // Auto-hide success messages after 3 seconds
     if (type === 'success') {
         setTimeout(() => {
-            statusElement.style.display = 'none';
+            statusElement.classList.add('hidden');
         }, 3000);
     }
 }
