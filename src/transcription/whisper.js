@@ -176,7 +176,7 @@ class WhisperTranscriber {
       if (riff !== 'RIFF' || wave !== 'WAVE') {
         return { valid: false, error: 'Not a valid WAV file' };
       }
-    } catch (error) {
+    } catch {
       return { valid: false, error: 'Cannot read file header' };
     }
 

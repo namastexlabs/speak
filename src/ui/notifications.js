@@ -1,4 +1,4 @@
-const { Notification, app, shell } = require('electron');
+const { Notification, shell } = require('electron');
 
 class NotificationManager {
   constructor() {
@@ -234,7 +234,7 @@ class NotificationManager {
       if (require('fs').existsSync(iconPath)) {
         return iconPath;
       }
-    } catch (error) {
+    } catch {
       // Continue to fallback
     }
 
@@ -273,7 +273,7 @@ class NotificationManager {
 
   // Close all notifications
   closeAll() {
-    for (const [id, notification] of this.notifications) {
+    for (const notification of this.notifications.values()) {
       notification.close();
     }
     this.notifications.clear();

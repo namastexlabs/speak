@@ -1,4 +1,4 @@
-const { Tray, Menu, app, BrowserWindow, nativeImage } = require('electron');
+const { Tray, Menu, app, nativeImage } = require('electron');
 const path = require('path');
 
 class SystemTray {
@@ -55,7 +55,7 @@ class SystemTray {
         if (require('fs').existsSync(iconPath)) {
           return nativeImage.createFromPath(iconPath);
         }
-      } catch (error) {
+      } catch {
         // Continue to next path
       }
     }
@@ -66,7 +66,6 @@ class SystemTray {
 
   // Create a fallback tray icon
   createFallbackIcon() {
-    const size = process.platform === 'darwin' ? 22 : 16;
     const icon = nativeImage.createEmpty();
 
     // Create a simple colored square as fallback
