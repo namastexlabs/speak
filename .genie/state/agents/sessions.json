@@ -82,6 +82,20 @@
       "lastPrompt": "Review the Forge implementation for \"Speak Initial Product Enhancements\" wish and validate completeness.\n\n**Wish Document:** `.genie/wishes/speak-initial-enhancements/wish.md`\n\n**What Forge Claimed to",
       "mode": "default",
       "sessionId": "e2a6150a-e37e-4bbe-9f36-5df748be64a7",
+      "background": true,
+      "preset": "default"
+    },
+    "speak-mvp-implementation": {
+      "agent": "forge",
+      "name": "speak-mvp-implementation",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-22T23:53:24.485Z",
+      "lastUsed": "2025-10-22T23:53:24.485Z",
+      "lastPrompt": "Implement Phase 1 MVP for Speak voice dictation app - Core Functional Features.\n\n**Context:**\nReview agent identified critical gaps. Documentation exists but ZERO functional code. Need complete MVP im",
+      "mode": "default",
+      "sessionId": "4882c5d6-8784-4f14-9163-b92a7c3c0c84",
       "background": true
     }
   }
