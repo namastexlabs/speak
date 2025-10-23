@@ -90,9 +90,9 @@ jobs:
 
           **Install:**
           \`\`\`bash
-          npm install speak@next
+          npm install @namastexlabs/speak@next
           # or
-          npm install speak@${VERSION}
+          npm install @namastexlabs/speak@${VERSION}
           \`\`\`
 
           **Quick Start:**
@@ -121,7 +121,7 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           echo "✅ Published v${VERSION} to npm @next"
-          echo "📦 Install: npm install speak@next"
+          echo "📦 Install: npm install @namastexlabs/speak@next"
           echo "🔗 Release: https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
           echo "🎉 Success!"
 
