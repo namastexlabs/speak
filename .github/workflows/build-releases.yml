@@ -15,13 +15,13 @@ jobs:
         include:
           - os: windows-latest
             platform: win
-            artifact: Speak-Setup-*.exe
+            artifact: Speak*.exe
           - os: macos-latest
             platform: mac
-            artifact: Speak-*.dmg
+            artifact: Speak*.dmg
           - os: ubuntu-latest
             platform: linux
-            artifact: Speak-*.AppImage
+            artifact: Speak*.AppImage
 
     steps:
       - name: Checkout Repository
