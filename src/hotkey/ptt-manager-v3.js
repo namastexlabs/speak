@@ -1,12 +1,21 @@
 const { globalShortcut } = require('electron');
-const { MicVAD } = require('@ricky0123/vad-node');
+
+// Try to load VAD, but make it optional (native deps might not be built yet)
+let MicVAD = null;
+try {
+  MicVAD = require('@ricky0123/vad-node').MicVAD;
+  console.log('PTT V3: VAD module loaded successfully');
+} catch (error) {
+  console.warn('PTT V3: VAD module not available (native deps not built), using manual-stop mode only');
+  console.warn('PTT V3: Run "pnpm install" to enable VAD auto-stop feature');
+}
 
 /**
- * PTT Manager V3 - Toggle mode with VAD auto-stop
+ * PTT Manager V3 - Toggle mode with optional VAD auto-stop
  * SIMPLE. RELIABLE. ACTUALLY WORKS.
  *
- * Press hotkey → Start recording + VAD monitoring
- * VAD detects silence → Auto-stop after X seconds
+ * Press hotkey → Start recording (+ VAD monitoring if available)
+ * VAD detects silence → Auto-stop after X seconds (if VAD available)
  * Or press hotkey again → Manual stop
  */
 class PTTManagerV3 {
@@ -147,6 +156,12 @@ class PTTManagerV3 {
    * Start Voice Activity Detection
    */
   async startVAD() {
+    // Skip VAD if module not available
+    if (!MicVAD) {
+      console.log('PTT V3: VAD not available, use manual stop (press hotkey again)');
+      return;
+    }
+
     try {
       this.vad = await MicVAD.new({
         onSpeechStart: () => {
