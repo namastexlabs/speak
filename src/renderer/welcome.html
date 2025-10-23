@@ -30,7 +30,7 @@
             opacity: 1;
             transform: translateY(0);
             pointer-events: auto;
-            max-height: 500px;
+            max-height: 600px;
         }
         .pulse-success {
             animation: pulseSuccess 0.6s ease-in-out;
@@ -39,10 +39,48 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+        /* Custom title bar */
+        .titlebar {
+            -webkit-app-region: drag;
+            height: 32px;
+            background: transparent;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 8px;
+        }
+        .titlebar-button {
+            -webkit-app-region: no-drag;
+            width: 46px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .titlebar-button:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+        }
+        .titlebar-button.close:hover {
+            background: #e81123;
+            opacity: 1;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-base-100 flex items-center justify-center">
-    <div class="w-full max-w-2xl px-6">
+<body class="min-h-screen bg-base-100">
+    <!-- Custom Title Bar -->
+    <div class="titlebar">
+        <button class="titlebar-button" onclick="minimizeWindow()">
+            <svg width="10" height="1"><path fill="currentColor" d="M0,0 L10,0 L10,1 L0,1 Z"/></svg>
+        </button>
+        <button class="titlebar-button close" onclick="closeWindow()">
+            <svg width="10" height="10"><path fill="currentColor" d="M0,0 L1,0 L5,4 L9,0 L10,0 L10,1 L6,5 L10,9 L10,10 L9,10 L5,6 L1,10 L0,10 L0,9 L4,5 L0,1 Z"/></svg>
+        </button>
+    </div>
+
+    <div class="w-full max-w-2xl px-6 mx-auto" style="padding-top: 2rem;">
         <!-- Skip Link -->
         <div class="text-right mb-6 opacity-40 hover:opacity-100 transition-opacity">
             <a href="#" class="link link-hover text-xs" onclick="skipWelcome()">Skip setup</a>
@@ -107,18 +145,28 @@
             </div>
         </div>
 
-        <!-- Step 2: Microphone Permission -->
+        <!-- Step 2: Audio Setup -->
         <div id="step-2" class="step-container step-hidden mt-6">
             <div class="card bg-base-200 shadow-xl">
                 <div class="card-body">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="badge badge-primary badge-lg">2</div>
-                        <h2 class="text-2xl font-semibold">Microphone Access</h2>
+                        <h2 class="text-2xl font-semibold">Audio Setup</h2>
                     </div>
 
                     <p class="text-base opacity-70 mb-6">
-                        Grant microphone access so we can record your voice when you dictate.
+                        Select your microphone and grant recording permission.
                     </p>
+
+                    <!-- Audio Device Selection -->
+                    <div class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Microphone</span>
+                        </label>
+                        <select id="audio-device" class="select select-bordered w-full">
+                            <option value="default">Default System Microphone</option>
+                        </select>
+                    </div>
 
                     <button id="grant-mic-btn" class="btn btn-primary btn-lg w-full" onclick="grantMicrophoneAccess()">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

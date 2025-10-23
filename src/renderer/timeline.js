@@ -224,6 +224,17 @@ function openExternal(url) {
     ipcRenderer.invoke('open-external', url);
 }
 
+// Window controls
+function minimizeWindow() {
+    ipcRenderer.invoke('minimize-window');
+}
+
+function closeWindow() {
+    ipcRenderer.invoke('close-window');
+}
+
 // Export for global access
 window.openSettings = openSettings;
 window.openExternal = openExternal;
+window.minimizeWindow = minimizeWindow;
+window.closeWindow = closeWindow;

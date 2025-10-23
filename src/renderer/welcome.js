@@ -139,8 +139,9 @@ function advanceToStep(stepNumber) {
 
     currentStep = stepNumber;
 
-    // Auto-focus relevant input/button
+    // Step-specific actions
     if (stepNumber === 2) {
+        loadAudioDevices();
         setTimeout(() => {
             document.getElementById('grant-mic-btn')?.focus();
         }, 400);
@@ -158,6 +159,38 @@ function updateProgress(activeStep) {
             indicator.classList.remove('bg-primary');
             indicator.classList.add('bg-base-300');
         }
+    }
+}
+
+// Load available audio devices
+async function loadAudioDevices() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(device => device.kind === 'audioinput');
+
+        const select = document.getElementById('audio-device');
+        select.innerHTML = '';
+
+        if (audioInputs.length === 0) {
+            select.innerHTML = '<option value="default">Default System Microphone</option>';
+            return;
+        }
+
+        audioInputs.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.deviceId || 'default';
+            option.textContent = device.label || `Microphone ${index + 1}`;
+            select.appendChild(option);
+        });
+
+        // Save selection when changed
+        select.addEventListener('change', () => {
+            const selectedDevice = select.value;
+            ipcRenderer.invoke('update-settings', { audioDevice: selectedDevice });
+        });
+
+    } catch (error) {
+        console.warn('Failed to enumerate audio devices:', error);
     }
 }
 
@@ -239,4 +272,13 @@ function showStatus(elementId, message, type) {
             statusElement.style.display = 'none';
         }, 2000);
     }
+}
+
+// Window controls
+function minimizeWindow() {
+    ipcRenderer.invoke('minimize-window');
+}
+
+function closeWindow() {
+    ipcRenderer.invoke('close-window');
 }

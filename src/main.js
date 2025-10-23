@@ -57,6 +57,8 @@ function createMainWindow() {
     width: 1200,
     height: 800,
     icon: iconPath,
+    frame: false, // Remove window frame for app-like experience
+    backgroundColor: '#1a1a1a', // Luxury theme background
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -65,7 +67,6 @@ function createMainWindow() {
       webSecurity: true,
       allowRunningInsecureContent: false
     },
-    titleBarStyle: 'default',
     show: false
   });
 
@@ -333,6 +334,21 @@ function setupIPCHandlers() {
     } catch (error) {
       return errorHandler.handleError(error, { handler: 'open-external', url });
     }
+  });
+
+  // Window controls
+  ipcMain.handle('minimize-window', () => {
+    if (mainWindow) {
+      mainWindow.minimize();
+    }
+    return { success: true };
+  });
+
+  ipcMain.handle('close-window', () => {
+    if (mainWindow) {
+      mainWindow.close();
+    }
+    return { success: true };
   });
 
   ipcMain.handle('close-settings', async () => {
