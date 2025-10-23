@@ -325,11 +325,15 @@ function setupHotkeyCallbacks() {
   hotkeyManager.setRecordingCallback(async (action) => {
     try {
       if (action === 'start') {
-        const result = await ipcMain.handle('start-recording');
-        return result;
+        // Trigger recording start via renderer
+        if (mainWindow && mainWindow.webContents) {
+          mainWindow.webContents.send('hotkey-start-recording');
+        }
       } else if (action === 'stop') {
-        const result = await ipcMain.handle('stop-recording');
-        return result;
+        // Trigger recording stop via renderer
+        if (mainWindow && mainWindow.webContents) {
+          mainWindow.webContents.send('hotkey-stop-recording');
+        }
       }
     } catch (error) {
       errorHandler.handleError(error, { context: 'hotkey-callback', action });
@@ -340,28 +344,20 @@ function setupHotkeyCallbacks() {
 // App event handlers
 app.whenReady().then(async () =>{
   // Set up permission handlers for media devices (MUST be before creating windows)
+  // DON'T auto-approve - let the system show the permission dialog
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
     console.log(`Permission request: ${permission}`);
 
-    // Allow microphone and media permissions
-    if (permission === 'media' || permission === 'mediaDevices') {
+    // For media permissions, always approve so Windows shows the OS-level permission dialog
+    // The actual permission is controlled by Windows, not Electron
+    if (permission === 'media') {
+      console.log('Approving media permission - Windows will handle the OS dialog');
       callback(true);
       return;
     }
 
     // Deny other permissions
     callback(false);
-  });
-
-  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    console.log(`Permission check: ${permission}`);
-
-    // Allow microphone and media permissions
-    if (permission === 'media' || permission === 'mediaDevices') {
-      return true;
-    }
-
-    return false;
   });
 
   // Initialize all modules

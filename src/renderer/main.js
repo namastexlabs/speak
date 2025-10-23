@@ -13,6 +13,15 @@ async function initializeUI() {
     document.getElementById('start-btn').addEventListener('click', startRecording);
     document.getElementById('stop-btn').addEventListener('click', stopRecording);
 
+    // Listen for hotkey-triggered recording events
+    ipcRenderer.on('hotkey-start-recording', () => {
+        startRecording();
+    });
+
+    ipcRenderer.on('hotkey-stop-recording', () => {
+        stopRecording();
+    });
+
     // Listen for recording state changes from main process
     ipcRenderer.on('recording-state-changed', (event, isRecording) => {
         updateRecordingState(isRecording);

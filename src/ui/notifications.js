@@ -163,14 +163,30 @@ class NotificationManager {
 
   // Show microphone permission required notification
   showMicrophonePermissionRequired() {
-    return this.show({
-      title: 'Speak - Microphone Access Required',
-      body: 'Please allow microphone access when prompted by your browser',
-      icon: this.getIconPath('warning'),
-      silent: false,
-      urgency: 'critical',
-      timeoutType: 'never'
+    const { dialog } = require('electron');
+
+    // Show a dialog with instructions
+    const response = dialog.showMessageBoxSync({
+      type: 'warning',
+      title: 'Microphone Access Blocked',
+      message: 'Windows has blocked microphone access',
+      detail: 'To fix this:\n\n' +
+              '1. Close this app\n' +
+              '2. Open Windows Settings > Privacy > Microphone\n' +
+              '3. Turn ON "Let desktop apps access your microphone"\n' +
+              '4. Find "Electron" in the list and toggle it ON\n' +
+              '5. Restart Speak\n\n' +
+              'Click "Open Settings" to go there now.',
+      buttons: ['Open Settings', 'Cancel'],
+      defaultId: 0,
+      cancelId: 1
     });
+
+    if (response === 0) {
+      this.openSystemPrivacySettings();
+    }
+
+    return null;
   }
 
   // Show welcome notification for first run
