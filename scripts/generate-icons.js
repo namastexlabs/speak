@@ -39,4 +39,28 @@ const trayRecording = path.join(outputPath, 'tray-recording.svg');
 fs.writeFileSync(trayRecording, recordingContent);
 console.log('Created tray-recording.svg');
 
+// Create app icon (512x512 for better quality)
+const appIconContent = micContent
+  .replace('width="24"', 'width="512"')
+  .replace('height="24"', 'height="512"')
+  .replace('stroke-width="2"', 'stroke-width="32"');
+
+const appIcon = path.join(outputPath, 'app-icon.svg');
+fs.writeFileSync(appIcon, appIconContent);
+console.log('Created app-icon.svg');
+
+// Export icon generation as module
+const iconIndex = path.join(outputPath, 'index.js');
+fs.writeFileSync(iconIndex, `
+const path = require('path');
+
+module.exports = {
+  trayNormal: path.join(__dirname, 'tray-normal.svg'),
+  trayRecording: path.join(__dirname, 'tray-recording.svg'),
+  notification: path.join(__dirname, 'notification.svg'),
+  appIcon: path.join(__dirname, 'app-icon.svg')
+};
+`);
+console.log('Created index.js');
+
 console.log('\n✅ All icons generated successfully!');

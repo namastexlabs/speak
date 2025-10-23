@@ -48,9 +48,13 @@ function createMainWindow() {
   // Check if first run
   const isFirstRun = settingsManager.isFirstRun();
 
+  // Get app icon path
+  const iconPath = path.join(__dirname, '../assets/icons/app-icon.svg');
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

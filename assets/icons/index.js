@@ -1,6 +1,9 @@
-// Auto-generated icon paths
+
+const path = require('path');
+
 module.exports = {
-  trayNormal: __dirname + '/tray-normal.png',
-  trayRecording: __dirname + '/tray-recording.png',
-  notification: __dirname + '/notification.png'
+  trayNormal: path.join(__dirname, 'tray-normal.svg'),
+  trayRecording: path.join(__dirname, 'tray-recording.svg'),
+  notification: path.join(__dirname, 'notification.svg'),
+  appIcon: path.join(__dirname, 'app-icon.svg')
 };
