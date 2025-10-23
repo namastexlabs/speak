@@ -1,5 +1,27 @@
 const { UiohookKey, uIOhook } = require('uiohook-napi');
 
+const MASK_SHIFT_L = 1 << 0;
+const MASK_CTRL_L = 1 << 1;
+const MASK_META_L = 1 << 2;
+const MASK_ALT_L = 1 << 3;
+const MASK_SHIFT_R = 1 << 4;
+const MASK_CTRL_R = 1 << 5;
+const MASK_META_R = 1 << 6;
+const MASK_ALT_R = 1 << 7;
+
+const MODIFIER_MASKS = new Map([
+  [UiohookKey.Ctrl, MASK_CTRL_L],
+  [UiohookKey.CtrlRight, MASK_CTRL_R],
+  [UiohookKey.Shift, MASK_SHIFT_L],
+  [UiohookKey.ShiftRight, MASK_SHIFT_R],
+  [UiohookKey.Alt, MASK_ALT_L],
+  [UiohookKey.AltRight, MASK_ALT_R],
+  [UiohookKey.Meta, MASK_META_L],
+  [UiohookKey.MetaRight, MASK_META_R],
+]);
+
+const MODIFIER_KEYS = new Set([...MODIFIER_MASKS.keys()]);
+
 /**
  * Push-to-Talk (PTT) Manager using native key event hooks
  * Supports true hold-to-record functionality across Windows and macOS
@@ -136,12 +158,14 @@ class PTTManager {
       return;
     }
 
-    console.log(`PTT: Key down event - keycode: ${event.keycode}, currentKeys before: ${Array.from(this.currentKeys)}`);
+    console.log(`PTT: Key down event - keycode: ${event.keycode}, mask: ${event.mask}, currentKeys before: ${Array.from(this.currentKeys)}`);
     this.currentKeys.add(event.keycode);
-    console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}, allKeysPressed: ${this.allKeysPressed()}`);
+    this.syncModifierState(event.mask);
+    const allPressed = this.allKeysPressed(event.mask);
+    console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}, allKeysPressed: ${allPressed}`);
 
     // Check if all required keys are pressed
-    if (this.allKeysPressed()) {
+    if (allPressed) {
       if (!this.pressStartTime) {
         this.pressStartTime = Date.now();
       }
@@ -166,10 +190,11 @@ class PTTManager {
    * Handle key up events
    */
   handleKeyUp(event) {
-    console.log(`PTT: Key up event - keycode: ${event.keycode}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${JSON.stringify(this.requiredKeys)}`);
+    console.log(`PTT: Key up event - keycode: ${event.keycode}, mask: ${event.mask}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${JSON.stringify(this.requiredKeys)}`);
     this.currentKeys.delete(event.keycode);
+    this.syncModifierState(event.mask);
 
-    const stillHoldingRequiredKeys = this.allKeysPressed();
+    const stillHoldingRequiredKeys = this.allKeysPressed(event.mask);
 
     if (this.holdTimer && !stillHoldingRequiredKeys) {
       console.log('PTT: Hold released before activation, cancelling pending start');
@@ -191,17 +216,48 @@ class PTTManager {
    * Check if all required keys are currently pressed
    * For each key group, at least one variant must be pressed
    */
-  allKeysPressed() {
+  allKeysPressed(currentMask = null) {
     if (this.requiredKeys.length === 0) return false;
 
     for (const keyGroup of this.requiredKeys) {
       // Check if ANY variant of this key group is pressed
-      const anyVariantPressed = keyGroup.some(keyCode => this.currentKeys.has(keyCode));
+      const anyVariantPressed = keyGroup.some(keyCode => {
+        if (this.isModifierKey(keyCode)) {
+          return this.isModifierActive(keyCode, currentMask);
+        }
+        return this.currentKeys.has(keyCode);
+      });
       if (!anyVariantPressed) {
         return false;
       }
     }
     return true;
+  }
+
+  isModifierKey(keyCode) {
+    return MODIFIER_KEYS.has(keyCode);
+  }
+
+  isModifierActive(keyCode, currentMask) {
+    if (MODIFIER_MASKS.has(keyCode) && currentMask != null) {
+      const maskBit = MODIFIER_MASKS.get(keyCode);
+      return (currentMask & maskBit) !== 0;
+    }
+    return this.currentKeys.has(keyCode);
+  }
+
+  syncModifierState(currentMask) {
+    if (currentMask == null) {
+      return;
+    }
+
+    for (const [modifierKey, maskBit] of MODIFIER_MASKS.entries()) {
+      if ((currentMask & maskBit) !== 0) {
+        this.currentKeys.add(modifierKey);
+      } else {
+        this.currentKeys.delete(modifierKey);
+      }
+    }
   }
 
   /**
