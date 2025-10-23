@@ -29,8 +29,13 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Configure Git
         run: |
@@ -65,49 +70,16 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Publish to npm
-        run: npm publish --tag next --access public
+        run: pnpm publish --tag next --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create Git Tag
+      - name: Create Git Tag and Trigger Build
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           git tag "v${VERSION}"
           git push origin "v${VERSION}"
-
-      - name: Create GitHub Release
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-
-          gh release create "v${VERSION}" \
-            --title "Release v${VERSION}" \
-            --notes "## 🚀 Automated RC Release
-
-          This RC was automatically published from main branch.
-
-          **Commit:** ${{ github.sha }}
-          **Message:** ${{ github.event.head_commit.message }}
-
-          **Install:**
-          \`\`\`bash
-          npm install @namastexlabs/speak@next
-          # or
-          npm install @namastexlabs/speak@${VERSION}
-          \`\`\`
-
-          **Quick Start:**
-          \`\`\`bash
-          git clone https://github.com/namastexlabs/speak.git
-          cd speak
-          ./run.sh
-          \`\`\`
-
-          This is a pre-release version for testing. For stable releases, see the latest non-RC version." \
-            --prerelease
-
-          echo "✅ Created release v${VERSION}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "✅ Created tag v${VERSION} - build-releases.yml will create release with executables"
 
       - name: Commit Version Bump
         run: |
