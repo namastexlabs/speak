@@ -1,0 +1,7 @@
+{
+  "approvals": {
+    "electron": true,
+    "@parcel/watcher": true,
+    "uiohook-napi": true
+  }
+}

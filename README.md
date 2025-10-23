@@ -70,9 +70,11 @@ That's it! The script will:
 **Manual setup (if you prefer):**
 
 1. Clone repository: `git clone https://github.com/namastexlabs/speak.git`
-2. Install dependencies: `npm install`
-3. Generate icons: `npm run generate-icons`
-4. Start app: `npm start`
+2. Install dependencies: `pnpm install` (npm and yarn also supported)
+3. Generate icons: `pnpm run generate-icons`
+4. Start app: `pnpm start`
+
+**Note for pnpm users on Windows:** Build scripts are pre-approved via `.pnpm-approvals.json` for required packages (electron, @parcel/watcher, uiohook-napi).
 
 [📖 Complete Getting Started Guide](./docs/getting-started.md)
 
