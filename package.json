@@ -1,6 +1,6 @@
 {
   "name": "@namastexlabs/speak",
-  "version": "0.1.0-rc.38",
+  "version": "0.1.0-rc.39",
   "description": "Open source voice dictation for everyone",
   "main": "src/main.js",
   "bin": {
