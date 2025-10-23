@@ -9,7 +9,7 @@ class PTTManager {
     this.isRecording = false;
     this.recordingCallback = null;
     this.currentKeys = new Set();
-    this.requiredKeys = new Set();
+    this.requiredKeys = []; // Array of arrays: [[leftCtrl, rightCtrl], [leftMeta, rightMeta], [keyS]]
     this.isEnabled = false;
     this.pressStartTime = null;
     this.minHoldTime = 200; // Minimum hold time in ms to prevent accidental triggers
@@ -29,7 +29,7 @@ class PTTManager {
     this.recordingCallback = callback;
     this.requiredKeys = this.parseHotkey(hotkey);
 
-    console.log('Starting PTT with keys:', Array.from(this.requiredKeys));
+    console.log('Starting PTT with keys:', JSON.stringify(this.requiredKeys));
 
     // Set up key event listeners
     uIOhook.on('keydown', (event) => {
@@ -49,9 +49,10 @@ class PTTManager {
 
   /**
    * Parse hotkey string to uiohook key codes
+   * Returns array of key groups where each group contains variants of the same logical key
    */
   parseHotkey(hotkeyString) {
-    const keys = new Set();
+    const keyGroups = [];
     const parts = hotkeyString.split('+');
 
     console.log(`PTT: Parsing hotkey "${hotkeyString}", parts:`, parts);
@@ -61,12 +62,17 @@ class PTTManager {
       const keyCode = this.getKeyCode(trimmed);
       console.log(`PTT: Parsed "${trimmed}" -> keycode: ${keyCode}`);
       if (keyCode !== null) {
-        keys.add(keyCode);
+        // Store as array even if single key (for consistent logic)
+        if (Array.isArray(keyCode)) {
+          keyGroups.push(keyCode);
+        } else {
+          keyGroups.push([keyCode]);
+        }
       }
     }
 
-    console.log(`PTT: Final requiredKeys:`, Array.from(keys));
-    return keys;
+    console.log(`PTT: Final requiredKeys:`, keyGroups);
+    return keyGroups;
   }
 
   /**
@@ -74,14 +80,14 @@ class PTTManager {
    */
   getKeyCode(keyName) {
     const keyMap = {
-      // Modifiers
-      'Control': UiohookKey.Ctrl,
-      'Ctrl': UiohookKey.Ctrl,
-      'Alt': UiohookKey.Alt,
-      'Shift': UiohookKey.Shift,
-      'Super': process.platform === 'darwin' ? UiohookKey.Meta : UiohookKey.Meta,
-      'Command': UiohookKey.Meta,
-      'Meta': UiohookKey.Meta,
+      // Modifiers - return arrays for keys that have left/right variants
+      'Control': [UiohookKey.Ctrl, UiohookKey.CtrlRight],
+      'Ctrl': [UiohookKey.Ctrl, UiohookKey.CtrlRight],
+      'Alt': [UiohookKey.Alt, UiohookKey.AltRight],
+      'Shift': [UiohookKey.Shift, UiohookKey.ShiftRight],
+      'Super': process.platform === 'darwin' ? [UiohookKey.Meta, UiohookKey.MetaRight] : [UiohookKey.Meta, UiohookKey.MetaRight],
+      'Command': [UiohookKey.Meta, UiohookKey.MetaRight],
+      'Meta': [UiohookKey.Meta, UiohookKey.MetaRight],
 
       // Letters
       'A': UiohookKey.A, 'B': UiohookKey.B, 'C': UiohookKey.C,
@@ -156,7 +162,7 @@ class PTTManager {
    * Handle key up events
    */
   handleKeyUp(event) {
-    console.log(`PTT: Key up event - keycode: ${event.keycode}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${Array.from(this.requiredKeys)}`);
+    console.log(`PTT: Key up event - keycode: ${event.keycode}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${JSON.stringify(this.requiredKeys)}`);
     this.currentKeys.delete(event.keycode);
 
     const stillHoldingRequiredKeys = this.allKeysPressed();
@@ -179,14 +185,19 @@ class PTTManager {
 
   /**
    * Check if all required keys are currently pressed
+   * For each key group, at least one variant must be pressed
    */
   allKeysPressed() {
-    for (const requiredKey of this.requiredKeys) {
-      if (!this.currentKeys.has(requiredKey)) {
+    if (this.requiredKeys.length === 0) return false;
+
+    for (const keyGroup of this.requiredKeys) {
+      // Check if ANY variant of this key group is pressed
+      const anyVariantPressed = keyGroup.some(keyCode => this.currentKeys.has(keyCode));
+      if (!anyVariantPressed) {
         return false;
       }
     }
-    return this.requiredKeys.size > 0;
+    return true;
   }
 
   /**
@@ -248,7 +259,7 @@ class PTTManager {
     return {
       isEnabled: this.isEnabled,
       isRecording: this.isRecording,
-      requiredKeys: Array.from(this.requiredKeys),
+      requiredKeys: this.requiredKeys,
       currentKeys: Array.from(this.currentKeys)
     };
   }
