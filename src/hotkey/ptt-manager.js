@@ -36,6 +36,8 @@ class PTTManager {
     this.pressStartTime = null;
     this.minHoldTime = 200; // Minimum hold time in ms to prevent accidental triggers
     this.holdTimer = null;
+    // Failsafe: ensure we never get stuck recording due to missed keyup
+    this.safetyTimer = null;
   }
 
   /**
@@ -160,7 +162,6 @@ class PTTManager {
 
     console.log(`PTT: Key down event - keycode: ${event.keycode}, mask: ${event.mask}, currentKeys before: ${Array.from(this.currentKeys)}`);
     this.currentKeys.add(event.keycode);
-    this.syncModifierState(event.mask);
     const allPressed = this.allKeysPressed(event.mask);
     console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}, allKeysPressed: ${allPressed}`);
 
@@ -192,9 +193,10 @@ class PTTManager {
   handleKeyUp(event) {
     console.log(`PTT: Key up event - keycode: ${event.keycode}, mask: ${event.mask}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${JSON.stringify(this.requiredKeys)}`);
     this.currentKeys.delete(event.keycode);
-    this.syncModifierState(event.mask);
 
-    const stillHoldingRequiredKeys = this.allKeysPressed(event.mask);
+    // On keyup, rely solely on our tracked key set to avoid
+    // stale/lagging modifier masks from the OS.
+    const stillHoldingRequiredKeys = this.allKeysPressed();
 
     if (this.holdTimer && !stillHoldingRequiredKeys) {
       console.log('PTT: Hold released before activation, cancelling pending start');
@@ -239,11 +241,34 @@ class PTTManager {
   }
 
   isModifierActive(keyCode, currentMask) {
-    if (MODIFIER_MASKS.has(keyCode) && typeof currentMask === 'number') {
-      const maskBit = MODIFIER_MASKS.get(keyCode);
-      return (currentMask & maskBit) !== 0;
+    // Prefer explicit key tracking based on keydown/keyup events.
+    // This avoids inconsistencies where event.mask may lag or be OS-filtered
+    // (notably with the Win/Meta key on Windows).
+    if (this.currentKeys.has(keyCode)) {
+      return true;
     }
-    return this.currentKeys.has(keyCode);
+
+    // Fallback to mask-based detection when available. Many platforms only
+    // set modifier state via mask bits (no separate keycodes for both sides).
+    if (typeof currentMask === 'number') {
+      // Map both left/right variants to the generic modifier bit.
+      const GENERIC_MASKS = new Map([
+        [UiohookKey.Ctrl, MASK_CTRL_L],
+        [UiohookKey.CtrlRight, MASK_CTRL_L],
+        [UiohookKey.Shift, MASK_SHIFT_L],
+        [UiohookKey.ShiftRight, MASK_SHIFT_L],
+        [UiohookKey.Alt, MASK_ALT_L],
+        [UiohookKey.AltRight, MASK_ALT_L],
+        [UiohookKey.Meta, MASK_META_L],
+        [UiohookKey.MetaRight, MASK_META_L],
+      ]);
+
+      const bit = GENERIC_MASKS.get(keyCode);
+      if (bit != null) {
+        return (currentMask & bit) !== 0;
+      }
+    }
+    return false;
   }
 
   syncModifierState(currentMask) {
@@ -272,6 +297,17 @@ class PTTManager {
     if (this.recordingCallback) {
       this.recordingCallback('start');
     }
+
+    // Start safety auto-stop after 30s in case keyup is missed by OS
+    if (this.safetyTimer) {
+      clearTimeout(this.safetyTimer);
+    }
+    this.safetyTimer = setTimeout(() => {
+      if (this.isRecording) {
+        console.log('PTT: Safety timer triggered, forcing stop');
+        this.stopRecording();
+      }
+    }, 30_000);
   }
 
   /**
@@ -286,6 +322,12 @@ class PTTManager {
 
     if (this.recordingCallback) {
       this.recordingCallback('stop');
+    }
+
+    // Clear safety timer
+    if (this.safetyTimer) {
+      clearTimeout(this.safetyTimer);
+      this.safetyTimer = null;
     }
   }
 
@@ -304,6 +346,11 @@ class PTTManager {
     if (this.holdTimer) {
       clearTimeout(this.holdTimer);
       this.holdTimer = null;
+    }
+
+    if (this.safetyTimer) {
+      clearTimeout(this.safetyTimer);
+      this.safetyTimer = null;
     }
 
     // Remove event listeners
