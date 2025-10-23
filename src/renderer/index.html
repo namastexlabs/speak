@@ -4,63 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speak - Open Source Voice Dictation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Alegreya+Sans:wght@400;500;700;800&family=Manrope:wght@400;500;600;700&family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --font-primary: 'Alegreya Sans', sans-serif;
+            --font-secondary: 'Manrope', sans-serif;
+            --font-mono: 'Chivo Mono', 'Fira Code', monospace;
+
+            /* Dracula theme colors */
+            --color-bg: hsl(231, 15%, 18%);  /* #282A36 */
+            --color-fg: hsl(60, 30%, 96%);   /* #F8F8F2 */
+            --color-selection: hsl(232, 14%, 31%);  /* #44475A */
+            --color-comment: hsl(225, 27%, 51%);    /* #6272A4 */
+            --color-purple: hsl(265, 89%, 78%);     /* #BD93F9 */
+            --color-pink: hsl(326, 100%, 74%);      /* #FF79C6 */
+            --color-cyan: hsl(191, 97%, 77%);       /* #8BE9FD */
+            --color-green: hsl(135, 94%, 65%);      /* #50FA7B */
+            --color-yellow: hsl(65, 92%, 76%);      /* #F1FA8C */
+            --color-orange: hsl(31, 100%, 71%);     /* #FFB86C */
+            --color-red: hsl(0, 100%, 67%);         /* #FF5555 */
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: var(--font-secondary);
             margin: 0;
             padding: 20px;
-            background: #f5f5f5;
-            color: #333;
+            background: var(--color-bg);
+            color: var(--color-fg);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-primary);
+            font-weight: 700;
+        }
+
+        code, pre, .font-mono, .hotkey-display {
+            font-family: var(--font-mono);
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            background: white;
+            background: var(--color-selection);
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--color-comment);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            border-bottom: 2px solid var(--color-purple);
+            padding-bottom: 20px;
         }
         h1 {
-            color: #0066CC;
+            color: var(--color-purple);
             margin: 0;
+            font-size: 2.5rem;
         }
         .settings-btn {
-            background: #0066CC;
-            color: white;
+            background: var(--color-purple);
+            color: var(--color-bg);
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
         .settings-btn:hover {
-            background: #0052a3;
+            background: var(--color-pink);
+            box-shadow: 0 0 15px hsla(265, 89%, 78%, 0.5);
         }
         .status-card {
-            background: #f8f9fa;
-            padding: 20px;
+            background: var(--color-bg);
+            padding: 24px;
             border-radius: 8px;
             margin: 20px 0;
-            border-left: 4px solid #0066CC;
+            border: 2px solid var(--color-comment);
+            border-left: 4px solid var(--color-purple);
         }
         .status-ready {
-            border-left-color: #28a745;
-            background: #d4edda;
+            border-left-color: var(--color-green);
+            background: hsla(135, 94%, 65%, 0.1);
         }
         .status-recording {
-            border-left-color: #dc3545;
-            background: #f8d7da;
+            border-left-color: var(--color-red);
+            background: hsla(0, 100%, 67%, 0.1);
             animation: pulse 1s infinite;
         }
         .status-error {
-            border-left-color: #ffc107;
-            background: #fff3cd;
+            border-left-color: var(--color-yellow);
+            background: hsla(65, 92%, 76%, 0.1);
         }
         @keyframes pulse {
             0% { opacity: 1; }
@@ -68,13 +109,15 @@
             100% { opacity: 1; }
         }
         .hotkey-display {
-            background: #e9ecef;
-            padding: 10px 15px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-weight: bold;
+            background: var(--color-bg);
+            border: 2px solid var(--color-cyan);
+            color: var(--color-cyan);
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
             display: inline-block;
             margin: 10px 0;
+            letter-spacing: 0.5px;
         }
         .recording-indicator {
             display: none;
@@ -96,66 +139,80 @@
             margin: 30px 0;
         }
         .feature {
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 24px;
+            border: 1px solid var(--color-comment);
+            border-radius: 8px;
             text-align: center;
+            background: var(--color-bg);
+            transition: all 0.2s;
+        }
+        .feature:hover {
+            border-color: var(--color-purple);
+            box-shadow: 0 4px 12px hsla(265, 89%, 78%, 0.2);
         }
         .feature h3 {
-            color: #0066CC;
-            margin-top: 0;
+            color: var(--color-purple);
+            margin-top: 10px;
         }
         .feature-icon {
             font-size: 32px;
             margin-bottom: 10px;
         }
         .instructions {
-            background: #e7f3ff;
-            padding: 20px;
+            background: hsla(191, 97%, 77%, 0.1);
+            padding: 24px;
             border-radius: 8px;
             margin: 20px 0;
+            border: 1px solid var(--color-cyan);
         }
         .instructions ol {
             margin: 0;
-            padding-left: 20px;
+            padding-left: 24px;
         }
         .instructions li {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .test-controls {
-            background: #f8f9fa;
-            padding: 20px;
+            background: var(--color-bg);
+            padding: 24px;
             border-radius: 8px;
             margin: 20px 0;
+            border: 1px solid var(--color-comment);
         }
         .test-controls h3 {
             margin-top: 0;
-            color: #495057;
+            color: var(--color-purple);
         }
         .btn {
-            background: #0066CC;
-            color: white;
+            background: var(--color-green);
+            color: var(--color-bg);
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 12px 24px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
             margin: 5px;
+            transition: all 0.2s;
         }
         .btn:hover {
-            background: #0052a3;
+            background: hsl(135, 94%, 60%);
+            box-shadow: 0 0 15px hsla(135, 94%, 65%, 0.5);
         }
         .btn-secondary {
-            background: #6c757d;
+            background: var(--color-comment);
+            color: var(--color-fg);
         }
         .btn-secondary:hover {
-            background: #545b62;
+            background: hsl(225, 27%, 56%);
         }
         .btn-danger {
-            background: #dc3545;
+            background: var(--color-red);
+            color: var(--color-bg);
         }
         .btn-danger:hover {
-            background: #c82333;
+            background: hsl(0, 100%, 62%);
+            box-shadow: 0 0 15px hsla(0, 100%, 67%, 0.5);
         }
         .status-text {
             font-size: 18px;
@@ -163,26 +220,29 @@
             margin: 10px 0;
         }
         .last-transcription {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
+            background: var(--color-bg);
+            padding: 20px;
+            border-radius: 6px;
             margin: 10px 0;
             font-style: italic;
-            border-left: 3px solid #0066CC;
+            border-left: 3px solid var(--color-yellow);
+            border: 1px solid var(--color-comment);
         }
         .footer {
             text-align: center;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #ddd;
-            color: #666;
+            border-top: 2px solid var(--color-comment);
+            color: var(--color-comment);
             font-size: 14px;
         }
         .footer a {
-            color: #0066CC;
+            color: var(--color-cyan);
             text-decoration: none;
+            transition: color 0.2s;
         }
         .footer a:hover {
+            color: var(--color-purple);
             text-decoration: underline;
         }
     </style>
