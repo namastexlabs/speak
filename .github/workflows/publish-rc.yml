@@ -70,16 +70,31 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Publish to npm
-        run: pnpm publish --tag next --access public --no-git-checks
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Check if version already exists
+          if npm view @namastexlabs/speak@$VERSION version 2>/dev/null; then
+            echo "⚠️  Version $VERSION already published, skipping npm publish"
+            exit 0
+          fi
+
+          pnpm publish --tag next --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Git Tag and Trigger Build
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          git tag "v${VERSION}"
-          git push origin "v${VERSION}"
-          echo "✅ Created tag v${VERSION} - build-releases.yml will create release with executables"
+
+          # Check if tag already exists
+          if git ls-remote --tags origin | grep -q "refs/tags/v${VERSION}"; then
+            echo "⚠️  Tag v${VERSION} already exists, skipping tag creation"
+          else
+            git tag "v${VERSION}"
+            git push origin "v${VERSION}"
+            echo "✅ Created tag v${VERSION} - build-releases.yml will create release with executables"
+          fi
 
       - name: Commit Version Bump
         run: |
