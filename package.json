@@ -1,6 +1,6 @@
 {
   "name": "speak",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.0",
   "description": "Open source voice dictation for everyone",
   "main": "src/main.js",
   "scripts": {

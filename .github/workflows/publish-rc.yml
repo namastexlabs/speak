@@ -1,0 +1,133 @@
+name: Publish RC on Main Commit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-rc:
+    # Skip if commit message contains [skip publish] or [skip ci]
+    if: |
+      !contains(github.event.head_commit.message, '[skip publish]') &&
+      !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump RC Version
+        id: version
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          # Bump to next RC version
+          if [[ $CURRENT_VERSION =~ ^([0-9]+\.[0-9]+\.[0-9]+)-rc\.([0-9]+)$ ]]; then
+            # Already an RC, increment RC number
+            BASE="${BASH_REMATCH[1]}"
+            RC_NUM="${BASH_REMATCH[2]}"
+            NEXT_RC=$((RC_NUM + 1))
+            NEW_VERSION="${BASE}-rc.${NEXT_RC}"
+          else
+            # Not an RC, make it rc.1
+            NEW_VERSION="${CURRENT_VERSION}-rc.1"
+          fi
+
+          echo "New version: $NEW_VERSION"
+
+          # Update package.json
+          npm version $NEW_VERSION --no-git-tag-version
+
+          # Output for later steps
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish to npm
+        run: npm publish --tag next --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create Git Tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub Release
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          gh release create "v${VERSION}" \
+            --title "Release v${VERSION}" \
+            --notes "## 🚀 Automated RC Release
+
+          This RC was automatically published from main branch.
+
+          **Commit:** ${{ github.sha }}
+          **Message:** ${{ github.event.head_commit.message }}
+
+          **Install:**
+          \`\`\`bash
+          npm install speak@next
+          # or
+          npm install speak@${VERSION}
+          \`\`\`
+
+          **Quick Start:**
+          \`\`\`bash
+          git clone https://github.com/namastexlabs/speak.git
+          cd speak
+          ./run.sh
+          \`\`\`
+
+          This is a pre-release version for testing. For stable releases, see the latest non-RC version." \
+            --prerelease
+
+          echo "✅ Created release v${VERSION}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit Version Bump
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to v${VERSION} [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "Nothing to push"
+
+      - name: Notify Success
+        if: success()
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "✅ Published v${VERSION} to npm @next"
+          echo "📦 Install: npm install speak@next"
+          echo "🔗 Release: https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
+          echo "🎉 Success!"
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          echo "❌ RC publish failed"
+          echo "Check logs above for details"
+          exit 1
