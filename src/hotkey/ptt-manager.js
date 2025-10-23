@@ -13,6 +13,7 @@ class PTTManager {
     this.isEnabled = false;
     this.pressStartTime = null;
     this.minHoldTime = 200; // Minimum hold time in ms to prevent accidental triggers
+    this.holdTimer = null;
   }
 
   /**
@@ -130,9 +131,24 @@ class PTTManager {
     console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}, allKeysPressed: ${this.allKeysPressed()}`);
 
     // Check if all required keys are pressed
-    if (this.allKeysPressed() && !this.isRecording) {
-      this.pressStartTime = Date.now();
-      this.startRecording();
+    if (this.allKeysPressed()) {
+      if (!this.pressStartTime) {
+        this.pressStartTime = Date.now();
+      }
+
+      if (!this.isRecording && !this.holdTimer) {
+        this.holdTimer = setTimeout(() => {
+          this.holdTimer = null;
+
+          if (!this.allKeysPressed()) {
+            console.log('PTT: Hold released before activation, skip recording start');
+            this.pressStartTime = null;
+            return;
+          }
+
+          this.startRecording();
+        }, this.minHoldTime);
+      }
     }
   }
 
@@ -143,21 +159,21 @@ class PTTManager {
     console.log(`PTT: Key up event - keycode: ${event.keycode}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${Array.from(this.requiredKeys)}`);
     this.currentKeys.delete(event.keycode);
 
+    const stillHoldingRequiredKeys = this.allKeysPressed();
+
+    if (this.holdTimer && !stillHoldingRequiredKeys) {
+      console.log('PTT: Hold released before activation, cancelling pending start');
+      clearTimeout(this.holdTimer);
+      this.holdTimer = null;
+      this.pressStartTime = null;
+      return;
+    }
+
     // If any required key is released and we're recording, stop
-    if (this.isRecording && !this.allKeysPressed()) {
-      // Check minimum hold time
-      const holdDuration = Date.now() - this.pressStartTime;
-      console.log(`PTT: Hold duration: ${holdDuration}ms (min: ${this.minHoldTime}ms)`);
-      if (holdDuration >= this.minHoldTime) {
-        this.stopRecording();
-      } else {
-        // Too short, cancel recording
-        console.log('Hold too short, cancelling recording');
-        this.isRecording = false;
-        if (this.recordingCallback) {
-          this.recordingCallback('cancel');
-        }
-      }
+    if (this.isRecording && !stillHoldingRequiredKeys) {
+      const holdDuration = this.pressStartTime ? Date.now() - this.pressStartTime : 0;
+      console.log(`PTT: Hold duration: ${holdDuration}ms`);
+      this.stopRecording();
     }
   }
 
@@ -194,6 +210,7 @@ class PTTManager {
     if (!this.isRecording) return;
 
     this.isRecording = false;
+    this.pressStartTime = null;
     console.log('PTT: Recording stopped');
 
     if (this.recordingCallback) {
@@ -211,6 +228,12 @@ class PTTManager {
     this.isEnabled = false;
     this.isRecording = false;
     this.currentKeys.clear();
+    this.pressStartTime = null;
+
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer);
+      this.holdTimer = null;
+    }
 
     // Stop uiohook
     uIOhook.stop();
