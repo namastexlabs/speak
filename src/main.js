@@ -30,7 +30,6 @@ const { createApplicationMenu } = require('./ui/menu');
 
 // Global references
 let mainWindow;
-let settingsWindow;
 let welcomeWindow;
 let systemTray;
 
@@ -98,37 +97,8 @@ function createMainWindow() {
   return mainWindow;
 }
 
-// Create settings window
-function createSettingsWindow() {
-  if (settingsWindow) {
-    settingsWindow.focus();
-    return;
-  }
-
-  settingsWindow = new BrowserWindow({
-    width: 800,
-    height: 700,
-    parent: mainWindow,
-    modal: true,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: false
-    },
-    title: 'Speak - Settings',
-    show: false
-  });
-
-  settingsWindow.loadFile(path.join(__dirname, 'renderer/settings.html'));
-
-  settingsWindow.once('ready-to-show', () => {
-    settingsWindow.show();
-  });
-
-  settingsWindow.on('closed', () => {
-    settingsWindow = null;
-  });
-}
+// Settings now use a modal dialog in the main window
+// No separate window needed
 
 // Create welcome window (for first run)
 function createWelcomeWindow() {
@@ -351,26 +321,7 @@ function setupIPCHandlers() {
     return { success: true };
   });
 
-  ipcMain.handle('close-settings', async () => {
-    if (settingsWindow) {
-      settingsWindow.close();
-    }
-    return { success: true };
-  });
-
-  // Handle settings window requests
-  ipcMain.handle('open-settings', async (event, options = {}) => {
-    createSettingsWindow();
-
-    // If specific tab requested, send message to settings window
-    if (options.tab && settingsWindow) {
-      settingsWindow.webContents.on('did-finish-load', () => {
-        settingsWindow.webContents.send('switch-tab', options.tab);
-      });
-    }
-
-    return { success: true };
-  });
+  // Settings window handlers removed - now using modal dialog
 
   // History handlers
   ipcMain.handle('get-history', async () => {

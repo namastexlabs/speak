@@ -218,10 +218,8 @@ function hideRecordingStatus() {
     document.getElementById('recording-status').classList.add('hidden');
 }
 
-// Open settings
-function openSettings() {
-    ipcRenderer.invoke('open-settings');
-}
+// Open settings (now handled by settings-modal.js)
+// function openSettings() is defined in settings-modal.js
 
 // Open external URL
 function openExternal(url) {
@@ -238,7 +236,6 @@ function closeWindow() {
 }
 
 // Export for global access
-window.openSettings = openSettings;
 window.openExternal = openExternal;
 window.minimizeWindow = minimizeWindow;
 window.closeWindow = closeWindow;
