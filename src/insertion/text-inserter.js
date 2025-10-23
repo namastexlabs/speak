@@ -162,7 +162,7 @@ class TextInserter {
   }
 
   // Insert text with special handling
-  async insertTextAdvanced(text, options = {}) {
+  async insertTextAdvanced(text) {
     const sanitizedText = this.sanitizeText(text);
     // Advanced insertion just uses regular clipboard method
     return await this.insertText(sanitizedText);

@@ -16,7 +16,7 @@
     "build:linux": "electron-builder --linux",
     "lint": "eslint src/**/*.js",
     "test": "jest",
-    "postinstall": "electron-rebuild",
+    "postinstall": "electron-builder install-app-deps",
     "prepublishOnly": "node scripts/generate-icons.js",
     "generate-icons": "node scripts/generate-icons.js",
     "check-deps": "node scripts/check-deps.js",
@@ -50,7 +50,6 @@
     "ws": "^8.14.2"
   },
   "devDependencies": {
-    "@electron/rebuild": "^3.7.2",
     "@eslint/js": "^9.18.0",
     "@tailwindcss/cli": "^4.1.15",
     "@types/node": "^20.10.0",

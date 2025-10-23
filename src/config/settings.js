@@ -1,7 +1,6 @@
 const Store = require('electron-store');
 const { OpenAI } = require('openai');
 const { app } = require('electron');
-const path = require('path');
 
 // Initialize electron-store with schema validation
 // Fix for packaged app: explicitly set cwd to avoid pkg-up issues

@@ -1,5 +1,4 @@
 const { UiohookKey, uIOhook } = require('uiohook-napi');
-const { app } = require('electron');
 
 /**
  * Push-to-Talk (PTT) Manager using native key event hooks

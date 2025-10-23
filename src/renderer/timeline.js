@@ -174,7 +174,7 @@ function setupEventListeners() {
     });
 
     // Listen for new transcription
-    ipcRenderer.on('transcription-added', async (event, entry) => {
+    ipcRenderer.on('transcription-added', async () => {
         await loadTranscriptionHistory();
         await updateStats();
     });

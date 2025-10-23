@@ -203,16 +203,6 @@ class HotkeyManager {
     });
   }
 
-  // Advanced hotkey handling for better hold detection
-  // This is a more sophisticated approach using key state tracking
-  setupAdvancedHotkey(modifier) {
-    // This would require additional libraries like 'iohook' for better key event handling
-    // For now, we'll stick with the basic Electron globalShortcut approach
-    // which works well enough for most use cases
-
-    console.log('Using basic hotkey handling - for advanced features, consider iohook library');
-  }
-
   // Simulate hotkey press (for testing)
   simulateHotkeyPress() {
     if (this.isRegistered) {
