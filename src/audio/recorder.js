@@ -1,150 +1,55 @@
-const recorder = require('node-record-lpcm16');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { execSync } = require('child_process');
 
 class AudioRecorder {
   constructor() {
-    this.recording = null;
     this.isRecording = false;
-    this.audioChunks = [];
     this.tempFile = null;
-    this.soxAvailable = this.checkSoxAvailability();
+    this.audioBuffer = null;
   }
 
-  // Check if sox is available
-  checkSoxAvailability() {
-    try {
-      execSync('which sox', { stdio: 'ignore' });
-      return true;
-    } catch (error) {
-      return false;
+  // Start recording (delegated to renderer process)
+  async startRecording() {
+    if (this.isRecording) {
+      throw new Error('Already recording');
     }
+
+    this.isRecording = true;
+    console.log('Recording started (handled by Web Audio API in renderer)');
+    return { success: true };
   }
 
-  // Start recording audio
-  startRecording() {
-    return new Promise((resolve, reject) => {
-      if (this.isRecording) {
-        reject(new Error('Already recording'));
-        return;
-      }
+  // Stop recording and save audio data from renderer
+  async stopRecording(audioData) {
+    if (!this.isRecording) {
+      throw new Error('Not currently recording');
+    }
 
-      // Check sox availability
-      if (!this.soxAvailable) {
-        reject(new Error(
-          'sox is not installed. Audio recording requires sox.\n' +
-          'Install instructions:\n' +
-          '  macOS: brew install sox\n' +
-          '  Ubuntu: sudo apt-get install sox libsox-fmt-all\n' +
-          '  Fedora: sudo dnf install sox\n' +
-          '  Windows: choco install sox or download from sox.sourceforge.net'
-        ));
-        return;
-      }
+    try {
+      // Create temporary file for audio data
+      this.tempFile = path.join(os.tmpdir(), `speak-recording-${Date.now()}.wav`);
 
-      try {
-        // Create temporary file for audio data
-        this.tempFile = path.join(os.tmpdir(), `speak-recording-${Date.now()}.wav`);
+      // Save buffer to file
+      const buffer = Buffer.from(audioData.buffer);
+      fs.writeFileSync(this.tempFile, buffer);
 
-        // Configure recording options for Whisper compatibility
-        const recordingOptions = {
-          sampleRate: 16000, // 16kHz required by Whisper
-          channels: 1, // Mono
-          audioType: 'wav', // WAV format
-          recorder: 'sox', // Use sox for cross-platform compatibility
-          device: 'default' // Use default audio device
-        };
+      this.audioBuffer = buffer;
+      this.isRecording = false;
 
-        // Start recording
-        this.recording = recorder.record(recordingOptions);
+      console.log(`Recording stopped, saved ${buffer.length} bytes to ${this.tempFile}`);
 
-        // Handle recording errors
-        this.recording.on('error', (error) => {
-          console.error('Recording error:', error);
-          
-          // Provide more helpful error messages
-          let errorMessage = error.message;
-          if (error.message.includes('sox')) {
-            errorMessage = 'sox failed to start. Make sure sox is installed and accessible.';
-          } else if (error.message.includes('Permission')) {
-            errorMessage = 'Microphone permission denied. Please grant microphone access to Speak.';
-          } else if (error.message.includes('device')) {
-            errorMessage = 'No audio device found. Please check your microphone connection.';
-          }
-          
-          const enhancedError = new Error(errorMessage);
-          enhancedError.originalError = error;
-          
-          this.stopRecording().catch(console.error);
-          reject(enhancedError);
-        });
+      return {
+        filePath: this.tempFile,
+        buffer: buffer,
+        size: buffer.length
+      };
 
-        // Set up stream to collect audio data
-        const audioStream = this.recording.stream();
-        this.audioChunks = [];
-
-        audioStream.on('data', (chunk) => {
-          this.audioChunks.push(chunk);
-        });
-
-        audioStream.on('end', () => {
-          console.log('Audio stream ended');
-        });
-
-        this.isRecording = true;
-        console.log('Started recording audio');
-        resolve();
-
-      } catch (error) {
-        console.error('Failed to start recording:', error);
-        reject(error);
-      }
-    });
-  }
-
-  // Stop recording and return audio data
-  stopRecording() {
-    return new Promise((resolve, reject) => {
-      if (!this.isRecording || !this.recording) {
-        reject(new Error('Not currently recording'));
-        return;
-      }
-
-      try {
-        // Stop the recording
-        this.recording.stop();
-        this.isRecording = false;
-
-        // Wait a bit for the stream to finish
-        setTimeout(() => {
-          try {
-            // Combine all audio chunks
-            const audioBuffer = Buffer.concat(this.audioChunks);
-
-            // Write to temporary file
-            fs.writeFileSync(this.tempFile, audioBuffer);
-
-            console.log(`Recording stopped, saved ${audioBuffer.length} bytes to ${this.tempFile}`);
-            resolve({
-              filePath: this.tempFile,
-              buffer: audioBuffer,
-              size: audioBuffer.length
-            });
-
-          } catch (error) {
-            console.error('Failed to process recorded audio:', error);
-            reject(error);
-          }
-        }, 500); // Wait 500ms for stream to finish
-
-      } catch (error) {
-        console.error('Failed to stop recording:', error);
-        this.isRecording = false;
-        reject(error);
-      }
-    });
+    } catch (error) {
+      console.error('Failed to process recorded audio:', error);
+      this.isRecording = false;
+      throw error;
+    }
   }
 
   // Get current recording status
@@ -166,54 +71,12 @@ class AudioRecorder {
       }
     }
     this.tempFile = null;
-    this.audioChunks = [];
+    this.audioBuffer = null;
   }
 
-  // Check if microphone is available
+  // Check if microphone is available (always true with Web Audio API)
   async checkMicrophoneAccess() {
-    return new Promise((resolve) => {
-      // First check if sox is available
-      if (!this.soxAvailable) {
-        resolve(false);
-        return;
-      }
-
-      try {
-        // Try to start a very short recording to test microphone access
-        const testRecording = recorder.record({
-          sampleRate: 16000,
-          channels: 1,
-          audioType: 'wav',
-          recorder: 'sox',
-          device: 'default'
-        });
-
-        const timeout = setTimeout(() => {
-          testRecording.stop();
-          resolve(false); // Timeout indicates no microphone access
-        }, 2000);
-
-        testRecording.on('error', (error) => {
-          clearTimeout(timeout);
-          console.error('Microphone test error:', error.message);
-          resolve(false);
-        });
-
-        // If we get data, microphone is accessible
-        const stream = testRecording.stream();
-        stream.on('data', (chunk) => {
-          if (chunk && chunk.length > 0) {
-            clearTimeout(timeout);
-            testRecording.stop();
-            resolve(true);
-          }
-        });
-
-      } catch (error) {
-        console.error('Microphone access check failed:', error);
-        resolve(false);
-      }
-    });
+    return true; // Web Audio API handles permission checks automatically
   }
 
   // Get system diagnostic information
@@ -222,18 +85,9 @@ class AudioRecorder {
       platform: os.platform(),
       arch: os.arch(),
       nodeVersion: process.version,
-      soxAvailable: this.soxAvailable,
+      audioAPI: 'Web Audio API',
       tempDir: os.tmpdir()
     };
-  }
-
-  // Get available audio devices (basic implementation)
-  getAvailableDevices() {
-    // This is a simplified implementation
-    // In a real app, you might use additional libraries to enumerate devices
-    return [
-      { id: 'default', name: 'Default System Microphone' }
-    ];
   }
 }
 

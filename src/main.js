@@ -192,15 +192,9 @@ function setupIPCHandlers() {
     }
   });
 
-  // Recording handlers
+  // Recording handlers (Web Audio API in renderer)
   ipcMain.handle('start-recording', async () => {
     try {
-      // Check microphone permission
-      const micAccess = await audioRecorder.checkMicrophoneAccess();
-      if (!micAccess) {
-        throw new Error('Microphone access denied');
-      }
-
       await audioRecorder.startRecording();
       systemTray.setRecordingState(true);
       notificationManager.showRecordingStarted();
@@ -211,16 +205,17 @@ function setupIPCHandlers() {
     }
   });
 
-  ipcMain.handle('stop-recording', async () => {
+  ipcMain.handle('stop-recording', async (event, audioData) => {
     try {
-      const audioData = await audioRecorder.stopRecording();
+      // Receive audio data from renderer process
+      const savedAudio = await audioRecorder.stopRecording(audioData);
       systemTray.setRecordingState(false);
 
       // Transcribe the audio
       notificationManager.showRecordingStopped();
 
       const transcription = await whisperTranscriber.transcribeAudio(
-        audioData.filePath,
+        savedAudio.filePath,
         { language: settingsManager.getAll().language }
       );
 
@@ -333,39 +328,8 @@ function setupHotkeyCallbacks() {
   });
 }
 
-// Setup permission handlers for Windows/Linux
-function setupPermissionHandlers() {
-  // Handle media permission requests (microphone, camera)
-  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    console.log(`Permission request: ${permission}`);
-
-    // Allow microphone access
-    if (permission === 'media') {
-      callback(true);
-      return;
-    }
-
-    // Deny other permissions by default
-    callback(false);
-  });
-
-  // Handle permission checks (for navigator.mediaDevices.getUserMedia)
-  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) => {
-    console.log(`Permission check: ${permission} from ${requestingOrigin}`);
-
-    // Allow microphone access
-    if (permission === 'media' || permission === 'mediaDevices') {
-      return true;
-    }
-
-    return false;
-  });
-}
-
 // App event handlers
-app.whenReady().then(async () => {
-  // Setup permission handlers BEFORE creating windows
-  setupPermissionHandlers();
+app.whenReady().then(async () =>{
 
   // Initialize all modules
   initializeModules();
@@ -428,25 +392,9 @@ app.on('browser-window-focus', () => {
   }
 });
 
-// Request microphone permission (platform-specific)
-if (process.platform === 'darwin') {
-  // macOS: System prompt via API
-  systemPreferences.askForMediaAccess('microphone').then((granted) => {
-    if (!granted) {
-      console.warn('Microphone permission denied');
-      notificationManager.showMicrophonePermissionRequired();
-    }
-  });
-} else if (process.platform === 'win32') {
-  // Windows: Show helpful message on first run to enable microphone in Settings
-  // Windows doesn't auto-prompt for non-UWP apps, user must manually enable
-  const settings = settingsManager.getAll();
-  if (!settings.microphoneSetupCompleted) {
-    setTimeout(() => {
-      notificationManager.showWindowsMicrophoneSetup();
-    }, 2000); // Show after app loads
-  }
-}
+// Microphone permissions are handled automatically by Web Audio API
+// The browser will prompt when getUserMedia() is called in the renderer process
+console.log('Microphone access will be requested via Web Audio API when recording starts');
 
 // Basic app info
 console.log('Speak voice dictation app starting...');

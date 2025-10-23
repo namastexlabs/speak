@@ -71,9 +71,8 @@ That's it! The script will:
 
 1. Clone repository: `git clone https://github.com/namastexlabs/speak.git`
 2. Install dependencies: `npm install`
-3. Install system dependencies: `./install.sh` (for audio recording)
-4. Generate icons: `npm run generate-icons`
-5. Start app: `npm start`
+3. Generate icons: `npm run generate-icons`
+4. Start app: `npm start`
 
 [📖 Complete Getting Started Guide](./docs/getting-started.md)
 
@@ -81,7 +80,6 @@ That's it! The script will:
 
 - **Node.js 18+** (auto-checked by run.sh)
 - **Microphone** (built-in or external)
-- **sox** (auto-installed by run.sh for audio recording)
 - **OpenAI API key** (configure in app after launch)
 
 ### Installation Options
@@ -94,24 +92,15 @@ That's it! The script will:
 
 **Option 2: Step-by-step**
 ```bash
-# 1. Install system dependencies
-./install.sh
-
-# 2. Install Node.js dependencies  
+# 1. Install Node.js dependencies
 npm install
 
-# 3. Generate app icons
+# 2. Generate app icons
 npm run generate-icons
 
-# 4. Start the app
+# 3. Start the app
 npm start
 ```
-
-**Platform-specific notes:**
-- **macOS**: `brew install sox` (auto-handled by install.sh)
-- **Ubuntu**: `sudo apt-get install sox libsox-fmt-all` (auto-handled)
-- **Windows**: `choco install sox` or download from sox.sourceforge.net
-- **Linux**: Uses system package manager automatically
 
 ### Development Setup
 
@@ -125,7 +114,6 @@ cd speak
 
 # Or manual setup
 npm install
-./install.sh
 npm run generate-icons
 npm run dev
 ```
@@ -193,7 +181,7 @@ cp .env.example .env
 - `openai` - API client (optional)
 - `electron-store` - Settings persistence
 - `robotjs` - Keyboard automation
-- `node-record-lpcm16` - Audio recording
+- Web Audio API - Browser-native audio recording
 
 See [Tech Stack](./.genie/product/tech-stack.md) for complete details.
 

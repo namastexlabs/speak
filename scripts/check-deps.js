@@ -106,24 +106,9 @@ function checkNativeModules() {
 }
 
 function checkAudioDependencies() {
-  const platform = process.platform;
-  let hasAudioDeps = true;
-  
-  if (platform === 'darwin') {
-    // macOS: sox via Homebrew or MacPorts
-    hasAudioDeps = checkCommand('sox', 'sox (audio recording)', true);
-  } else if (platform === 'linux') {
-    // Linux: sox via apt/yum/dnf
-    hasAudioDeps = checkCommand('sox', 'sox (audio recording)', true);
-  } else if (platform === 'win32') {
-    // Windows: sox via chocolatey or manual installation
-    hasAudioDeps = checkCommand('sox', 'sox (audio recording)', false);
-    if (!hasAudioDeps) {
-      log(`   Windows: Install sox manually or via chocolatey: choco install sox`, 'blue');
-    }
-  }
-  
-  return hasAudioDeps;
+  // Web Audio API is built into Electron/Chromium - no external dependencies needed
+  log(`✅ Web Audio API (built-in)`, 'green');
+  return true;
 }
 
 function checkAssets() {
@@ -157,31 +142,11 @@ function checkAssets() {
 }
 
 function showInstallInstructions() {
-  const platform = process.platform;
-  
   log('\n📋 Installation Instructions:', 'blue');
   log('==============================', 'blue');
-  
-  if (platform === 'darwin') {
-    log('macOS:', 'yellow');
-    log('  brew install sox', 'blue');
-    log('  npm install', 'blue');
-  } else if (platform === 'linux') {
-    log('Linux:', 'yellow');
-    log('  # Ubuntu/Debian:', 'blue');
-    log('  sudo apt-get update && sudo apt-get install sox libsox-fmt-all', 'blue');
-    log('  # Fedora:', 'blue');
-    log('  sudo dnf install sox', 'blue');
-    log('  npm install', 'blue');
-  } else if (platform === 'win32') {
-    log('Windows:', 'yellow');
-    log('  # Option 1: Chocolatey', 'blue');
-    log('  choco install sox', 'blue');
-    log('  # Option 2: Download from http://sox.sourceforge.net/', 'blue');
-    log('  npm install', 'blue');
-  }
-  
-  log('\nAfter installing dependencies:', 'yellow');
+
+  log('All Platforms:', 'yellow');
+  log('  npm install             # Install Node.js dependencies', 'blue');
   log('  npm run generate-icons  # Generate app icons', 'blue');
   log('  ./run.sh                # Start the app', 'blue');
 }

@@ -83,6 +83,10 @@ async function startRecording() {
     try {
         showTestStatus('Starting recording...', 'info');
 
+        // Start Web Audio recording in renderer
+        await window.audioBridge.startRecording();
+
+        // Notify main process
         const result = await ipcRenderer.invoke('start-recording');
 
         if (result.success) {
@@ -102,7 +106,11 @@ async function stopRecording() {
     try {
         showTestStatus('Stopping recording and transcribing...', 'info');
 
-        const result = await ipcRenderer.invoke('stop-recording');
+        // Stop Web Audio recording and get data
+        const audioData = await window.audioBridge.stopRecording();
+
+        // Send audio data to main process for transcription
+        const result = await ipcRenderer.invoke('stop-recording', audioData);
 
         if (result.success) {
             updateRecordingState(false);

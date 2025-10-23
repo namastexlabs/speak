@@ -95,30 +95,7 @@ else
     echo "✅ Dependencies ready"
 fi
 
-# 4. Check system dependencies
-echo "🔍 Checking system dependencies..."
-
-# Check sox (required for audio recording)
-if ! command -v sox &> /dev/null; then
-    echo "⚠️  sox not found (required for audio recording)"
-    echo ""
-    echo "Install instructions:"
-    echo "  macOS:   brew install sox"
-    echo "  Ubuntu:  sudo apt-get install sox libsox-fmt-all"
-    echo "  Fedora:  sudo dnf install sox"
-    echo "  Arch:    sudo pacman -S sox"
-    echo ""
-    read -p "Continue without sox? (audio recording will fail) (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "💡 Run ./install.sh to auto-install system dependencies"
-        exit 1
-    fi
-else
-    echo "✅ sox installed"
-fi
-
-# 5. Generate icons if needed
+# 4. Generate icons if needed
 if [ ! -d "assets/icons" ] || [ ! -f "assets/icons/tray-normal.png" ]; then
     echo "🎨 Generating app icons..."
     pnpm run generate-icons
