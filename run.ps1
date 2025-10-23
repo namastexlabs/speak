@@ -1,4 +1,4 @@
-# Speak - Voice Dictation
+﻿# Speak - Voice Dictation
 # One command setup and launch (Windows)
 
 Write-Host "🎤 Speak - Voice Dictation" -ForegroundColor Cyan
