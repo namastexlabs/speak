@@ -45,6 +45,7 @@
     "dotenv": "^17.2.3",
     "electron-store": "^8.2.0",
     "lucide-static": "^0.546.0",
+    "node-global-key-listener": "^0.3.0",
     "openai": "^4.20.1",
     "uiohook-napi": "^1.5.4",
     "ws": "^8.14.2"
