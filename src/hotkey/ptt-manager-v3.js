@@ -59,16 +59,18 @@ class PTTManagerV3 {
   }
 
   /**
-   * Convert our hotkey format to Electron format
-   * Super+Control → Super+Ctrl on Windows (Win+Ctrl), Cmd+Ctrl on Mac
+   * Convert our hotkey format to Electron globalShortcut accelerator format
+   *
+   * Electron accelerators: https://www.electronjs.org/docs/latest/api/accelerator
+   * Valid modifiers: Command/Cmd, Control/Ctrl, Alt, Option, AltGr, Shift, Super/Meta/CommandOrControl/CmdOrCtrl
+   *
+   * IMPORTANT: Super key is NOT supported on all platforms!
+   * - macOS: Super not supported (use Command instead)
+   * - Windows: Super supported (Win key)
+   * - Linux: Super NOT reliably supported (use Control+Alt instead)
    */
   convertHotkey(hotkey) {
     console.log(`PTT V3: Converting hotkey "${hotkey}" on platform: ${process.platform}`);
-
-    // Electron globalShortcut uses different format than our settings
-    // Our format: "Super+Control"
-    // Electron Windows: "Super+Ctrl" (Win key + Ctrl)
-    // Electron Mac: "Cmd+Ctrl"
 
     const parts = hotkey.split('+').map(p => p.trim());
     const electronParts = [];
@@ -76,11 +78,18 @@ class PTTManagerV3 {
     for (const part of parts) {
       switch (part) {
         case 'Super':
-          // On Windows: Super (Win key), On Mac: Cmd
+          // macOS: Use Command key
           if (process.platform === 'darwin') {
             electronParts.push('Command');
-          } else {
+          }
+          // Windows: Use Super (Win key)
+          else if (process.platform === 'win32') {
             electronParts.push('Super');
+          }
+          // Linux: Super not reliably supported, skip it and use just Ctrl+Alt
+          else {
+            console.log('PTT V3: Skipping Super on Linux (not supported), using Ctrl+Alt instead');
+            // Don't add Super, will use Ctrl+Alt combo below
           }
           break;
         case 'Command':
@@ -99,6 +108,13 @@ class PTTManagerV3 {
         default:
           electronParts.push(part);
       }
+    }
+
+    // Linux fallback: if Super+Control was requested, use Control+Alt+S instead
+    if (process.platform === 'linux' && hotkey.includes('Super')) {
+      const result = 'Control+Alt+S';
+      console.log(`PTT V3: Linux fallback - converted to: "${result}"`);
+      return result;
     }
 
     const result = electronParts.join('+');
