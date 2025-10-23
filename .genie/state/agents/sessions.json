@@ -96,6 +96,20 @@
       "lastPrompt": "Implement Phase 1 MVP for Speak voice dictation app - Core Functional Features.\n\n**Context:**\nReview agent identified critical gaps. Documentation exists but ZERO functional code. Need complete MVP im",
       "mode": "default",
       "sessionId": "4882c5d6-8784-4f14-9163-b92a7c3c0c84",
+      "background": true,
+      "preset": "default"
+    },
+    "speak-mvp-review-round2": {
+      "agent": "review",
+      "name": "speak-mvp-review-round2",
+      "executor": "opencode",
+      "executorVariant": "DEFAULT",
+      "status": "running",
+      "created": "2025-10-23T00:01:56.430Z",
+      "lastUsed": "2025-10-23T00:01:56.430Z",
+      "lastPrompt": "Review Phase 1 MVP implementation for Speak voice dictation app.\n\n**Context:**\nSecond Forge run completed - implemented 3,478 lines across 15 files to address critical gaps from first review.\n\n**What ",
+      "mode": "default",
+      "sessionId": "118e381b-5d48-4529-b40b-dae3228dc57f",
       "background": true
     }
   }
