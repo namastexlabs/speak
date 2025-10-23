@@ -12,9 +12,17 @@ document.addEventListener('DOMContentLoaded', () => {
 async function checkExistingSetup() {
     try {
         const settings = await ipcRenderer.invoke('get-settings');
-        if (settings.apiKey && settings.apiKey !== '***configured***') {
-            // API key exists, pre-fill it
-            document.getElementById('api-key').value = settings.apiKey;
+        if (settings.apiKey === '***configured***') {
+            // API key is already configured (likely from .env)
+            showStatus('api-status', '✅ API key loaded from configuration', 'success');
+
+            // Auto-validate the existing key
+            const validation = await ipcRenderer.invoke('test-api-key');
+            if (validation.valid) {
+                showStatus('api-status', '✅ API key is valid and ready to use', 'success');
+            } else {
+                showStatus('api-status', '⚠️ API key configured but validation failed: ' + validation.error, 'error');
+            }
         }
     } catch (error) {
         console.warn('Failed to check existing setup:', error);

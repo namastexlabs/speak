@@ -37,7 +37,20 @@ const store = new Store({
 class SettingsManager {
   constructor() {
     this.openai = null;
+    this.loadEnvApiKey();
     this.initializeOpenAI();
+  }
+
+  // Load API key from .env file if present and no key is stored
+  loadEnvApiKey() {
+    const storedKey = store.get('apiKey');
+    const envKey = process.env.OPENAI_API_KEY;
+
+    // If .env has a key and no key is stored, use the .env key
+    if (envKey && !storedKey) {
+      console.log('Loading OpenAI API key from .env file');
+      store.set('apiKey', envKey);
+    }
   }
 
   // Initialize OpenAI client with current API key
@@ -64,14 +77,20 @@ class SettingsManager {
   }
 
   // Validate API key by making a test request
-  async validateApiKey() {
-    if (!this.openai) {
+  async validateApiKey(apiKey = null) {
+    // Use provided key or fall back to stored key
+    const keyToTest = apiKey || this.getApiKey();
+
+    if (!keyToTest) {
       return { valid: false, error: 'No API key configured' };
     }
 
     try {
+      // Create a temporary OpenAI client to test the key
+      const testClient = new OpenAI({ apiKey: keyToTest });
+
       // Make a minimal test request to validate the key
-      await this.openai.models.list();
+      await testClient.models.list();
       return { valid: true };
     } catch (error) {
       return {
@@ -79,6 +98,11 @@ class SettingsManager {
         error: error.message || 'Invalid API key'
       };
     }
+  }
+
+  // Check if API key is configured (without exposing it)
+  hasApiKey() {
+    return !!this.getApiKey();
   }
 
   // Get all settings

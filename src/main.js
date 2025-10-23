@@ -1,6 +1,9 @@
 // Electron main process for Speak voice dictation app
 // Full MVP implementation with all core features
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const { app, BrowserWindow, ipcMain, dialog, shell, systemPreferences } = require('electron');
 const path = require('path');
 
@@ -166,7 +169,7 @@ function setupIPCHandlers() {
 
   ipcMain.handle('test-api-key', async (event, apiKey) => {
     try {
-      return await settingsManager.validateApiKey();
+      return await settingsManager.validateApiKey(apiKey);
     } catch (error) {
       return errorHandler.handleError(error, { handler: 'test-api-key' });
     }

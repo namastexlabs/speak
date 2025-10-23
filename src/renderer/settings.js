@@ -27,7 +27,16 @@ function initializeTabs() {
 async function loadSettings() {
     try {
         const settings = await ipcRenderer.invoke('get-settings');
-        document.getElementById('api-key').value = settings.apiKey;
+
+        // Handle API key display
+        const apiKeyInput = document.getElementById('api-key');
+        if (settings.apiKey === '***configured***') {
+            apiKeyInput.value = '';
+            apiKeyInput.placeholder = 'API key configured (from settings or .env)';
+        } else {
+            apiKeyInput.value = settings.apiKey;
+        }
+
         document.getElementById('audio-device').value = settings.audioDevice;
         document.getElementById('hotkey-modifier').value = settings.hotkey;
         document.getElementById('language').value = settings.language;
@@ -50,15 +59,12 @@ document.getElementById('hotkey-modifier').addEventListener('change', updateHotk
 // API Key functions
 async function testApiKey() {
     const apiKey = document.getElementById('api-key').value.trim();
-    if (!apiKey) {
-        showStatus('api-status', 'Please enter an API key first', 'error');
-        return;
-    }
 
     showStatus('api-status', 'Testing API key...', 'info');
 
     try {
-        const result = await ipcRenderer.invoke('test-api-key', apiKey);
+        // If no key in input, test the stored/configured key
+        const result = await ipcRenderer.invoke('test-api-key', apiKey || null);
         if (result.valid) {
             showStatus('api-status', 'API key is valid! ✓', 'success');
         } else {
