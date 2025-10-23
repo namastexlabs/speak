@@ -1,9 +1,12 @@
-const robot = require('robotjs');
 const { clipboard } = require('electron');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+
+const execAsync = promisify(exec);
 
 class TextInserter {
   constructor() {
-    this.useRobotJs = true; // Default to robotjs, fallback to clipboard
+    this.platform = process.platform;
   }
 
   // Insert text at cursor position
@@ -14,16 +17,7 @@ class TextInserter {
     }
 
     try {
-      // Try robotjs first (direct keyboard simulation)
-      if (this.useRobotJs) {
-        const result = await this.insertWithRobotJs(text);
-        if (result.success) {
-          return result;
-        }
-        console.warn('RobotJs insertion failed, falling back to clipboard');
-      }
-
-      // Fallback to clipboard method
+      // Use clipboard method with platform-specific paste simulation
       return await this.insertWithClipboard(text);
 
     } catch (error) {
@@ -36,37 +30,7 @@ class TextInserter {
     }
   }
 
-  // Insert text using robotjs (direct keyboard simulation)
-  async insertWithRobotJs(text) {
-    try {
-      // Small delay to ensure focus is ready
-      await this.delay(100);
-
-      // Type the text character by character
-      // This preserves cursor position and works in any application
-      robot.typeString(text);
-
-      // Small delay after typing
-      await this.delay(50);
-
-      console.log(`Inserted text with robotjs: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
-      return {
-        success: true,
-        method: 'robotjs',
-        characters: text.length
-      };
-
-    } catch (error) {
-      console.error('RobotJs insertion failed:', error);
-      return {
-        success: false,
-        error: error.message,
-        method: 'robotjs'
-      };
-    }
-  }
-
-  // Insert text using clipboard (fallback method)
+  // Insert text using clipboard with platform-specific paste
   async insertWithClipboard(text) {
     try {
       // Store current clipboard content
@@ -75,12 +39,11 @@ class TextInserter {
       // Copy text to clipboard
       clipboard.writeText(text);
 
-      // Small delay
-      await this.delay(50);
+      // Small delay to ensure clipboard is ready
+      await this.delay(100);
 
-      // Simulate Ctrl+V (or Cmd+V on Mac)
-      const modifier = process.platform === 'darwin' ? 'command' : 'control';
-      robot.keyTap('v', modifier);
+      // Simulate paste based on platform
+      await this.simulatePaste();
 
       // Restore original clipboard content after a delay
       setTimeout(() => {
@@ -108,21 +71,26 @@ class TextInserter {
     }
   }
 
-  // Test if robotjs is working
-  async testRobotJs() {
+  // Simulate paste using platform-specific tools
+  async simulatePaste() {
     try {
-      // Try to get screen size as a basic functionality test
-      const screenSize = robot.getScreenSize();
-      return {
-        available: true,
-        screenSize: screenSize
-      };
+      if (this.platform === 'linux') {
+        // Use xdotool on Linux
+        await execAsync('xdotool key ctrl+v');
+      } else if (this.platform === 'darwin') {
+        // Use AppleScript on macOS
+        await execAsync('osascript -e \'tell application "System Events" to keystroke "v" using command down\'');
+      } else if (this.platform === 'win32') {
+        // Use PowerShell on Windows
+        await execAsync('powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'^v\')"');
+      }
+
+      // Small delay after paste
+      await this.delay(50);
+
     } catch (error) {
-      console.warn('RobotJs not available:', error);
-      return {
-        available: false,
-        error: error.message
-      };
+      console.error('Failed to simulate paste:', error);
+      throw new Error(`Paste simulation failed: ${error.message}`);
     }
   }
 
@@ -146,24 +114,35 @@ class TextInserter {
 
   // Get insertion capabilities
   async getCapabilities() {
-    const robotjsTest = await this.testRobotJs();
     const clipboardTest = await this.testClipboard();
+    const pasteTest = await this.testPaste();
 
     return {
-      robotjs: robotjsTest,
       clipboard: clipboardTest,
-      preferred: robotjsTest.available ? 'robotjs' : 'clipboard'
+      paste: pasteTest,
+      preferred: 'clipboard'
     };
   }
 
-  // Set preferred insertion method
-  setPreferredMethod(method) {
-    if (method === 'robotjs') {
-      this.useRobotJs = true;
-    } else if (method === 'clipboard') {
-      this.useRobotJs = false;
-    } else {
-      console.warn('Invalid insertion method:', method);
+  // Test paste simulation
+  async testPaste() {
+    try {
+      // Test if the required tool is available
+      if (this.platform === 'linux') {
+        await execAsync('which xdotool');
+        return { available: true, tool: 'xdotool' };
+      } else if (this.platform === 'darwin') {
+        return { available: true, tool: 'osascript' };
+      } else if (this.platform === 'win32') {
+        return { available: true, tool: 'powershell' };
+      }
+      return { available: false, error: 'Unknown platform' };
+    } catch (error) {
+      return {
+        available: false,
+        error: error.message,
+        suggestion: this.platform === 'linux' ? 'Install xdotool: sudo apt-get install xdotool' : null
+      };
     }
   }
 
@@ -185,50 +164,8 @@ class TextInserter {
   // Insert text with special handling
   async insertTextAdvanced(text, options = {}) {
     const sanitizedText = this.sanitizeText(text);
-
-    if (options.delayBetweenChars) {
-      // Type with delays between characters (slower but more compatible)
-      return await this.insertWithDelays(sanitizedText, options.delayBetweenChars);
-    } else {
-      // Normal insertion
-      return await this.insertText(sanitizedText);
-    }
-  }
-
-  // Insert text with delays between characters
-  async insertWithDelays(text, delayMs = 10) {
-    try {
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-
-        // Handle special characters
-        if (char === '\n') {
-          robot.keyTap('enter');
-        } else if (char === '\t') {
-          robot.keyTap('tab');
-        } else {
-          robot.typeString(char);
-        }
-
-        if (delayMs > 0) {
-          await this.delay(delayMs);
-        }
-      }
-
-      return {
-        success: true,
-        method: 'robotjs-delayed',
-        characters: text.length
-      };
-
-    } catch (error) {
-      console.error('Delayed insertion failed:', error);
-      return {
-        success: false,
-        error: error.message,
-        method: 'robotjs-delayed'
-      };
-    }
+    // Advanced insertion just uses regular clipboard method
+    return await this.insertText(sanitizedText);
   }
 
   // Utility delay function
