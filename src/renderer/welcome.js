@@ -323,9 +323,17 @@ function normalizeKey(event) {
     if (key === 'Alt') return 'Alt';
     if (key === 'Shift') return 'Shift';
     if (key === 'Meta') {
-        // Meta is Win on Windows/Linux, Command on Mac
+        // Meta is Command on Mac (supported)
         if (process.platform === 'darwin') return 'Command';
-        return 'Super';
+
+        // Windows key (Super) is NOT supported by Electron globalShortcut on Windows
+        // Block it and show error message
+        if (process.platform === 'win32') {
+            showStatus('step-3-status', '⚠ Windows key not supported. Use Ctrl, Alt, or Shift instead.', 'warning');
+            return null;
+        }
+
+        return 'Super'; // Linux (may work on some systems)
     }
 
     // Regular keys (only allow single letters, F-keys, or special keys)

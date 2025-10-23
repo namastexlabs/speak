@@ -40,22 +40,60 @@ class PTTManagerV3 {
     this.recordingCallback = callback;
     this.hotkey = this.convertHotkey(hotkey);
 
+    // Validate hotkey before registration
+    const validation = this.validateHotkey(this.hotkey);
+    if (!validation.valid) {
+      console.error('PTT V3: Invalid hotkey:', validation.error);
+      return { success: false, error: validation.error };
+    }
+
     console.log(`PTT V3: Registering toggle hotkey: ${this.hotkey}`);
+    console.log('PTT V3: Platform:', process.platform);
+    console.log('PTT V3: Callback function:', typeof callback);
 
     // Register global shortcut (toggle mode)
     const success = globalShortcut.register(this.hotkey, () => {
-      console.log('PTT V3: Hotkey pressed, toggling recording');
+      console.log('🔥🔥🔥 PTT V3: HOTKEY PRESSED!!! 🔥🔥🔥');
+      console.log('PTT V3: Toggling recording state from:', this.isRecording);
       this.toggle();
     });
 
     if (!success) {
-      console.error('PTT V3: Failed to register hotkey');
-      return { success: false, error: 'Failed to register hotkey' };
+      console.error('❌ PTT V3: Failed to register hotkey');
+      console.error('❌ Hotkey that failed:', this.hotkey);
+      const errorMsg = this.hotkey.includes('Super')
+        ? 'Failed to register hotkey. The Windows key is not supported on Windows. Please use Ctrl, Alt, or Shift instead.'
+        : 'Failed to register hotkey. It may already be in use by another application.';
+      return { success: false, error: errorMsg };
     }
+
+    // Verify registration
+    const isRegistered = globalShortcut.isRegistered(this.hotkey);
+    console.log(`✅ PTT V3: Registration successful! Verified: ${isRegistered}`);
 
     this.isEnabled = true;
     console.log('PTT V3: System started (toggle mode)');
+    console.log('PTT V3: Press your hotkey now:', this.hotkey);
     return { success: true };
+  }
+
+  /**
+   * Validate hotkey for current platform
+   */
+  validateHotkey(hotkey) {
+    if (!hotkey || hotkey.trim() === '') {
+      return { valid: false, error: 'Hotkey is empty' };
+    }
+
+    // Check for Windows key (Super) on Windows - NOT supported by Electron
+    if (process.platform === 'win32' && hotkey.includes('Super')) {
+      return {
+        valid: false,
+        error: 'Windows key (Super) is not supported on Windows. Please use Ctrl, Alt, or Shift instead.'
+      };
+    }
+
+    return { valid: true };
   }
 
   /**
