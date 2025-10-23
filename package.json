@@ -76,6 +76,8 @@
       "assets/**/*",
       "scripts/**/*",
       "node_modules/**/*",
+      "!node_modules/node-global-key-listener/bin/MacKeyServer",
+      "!node_modules/node-global-key-listener/bin/WinKeyServer.exe.sig",
       "package.json"
     ],
     "mac": {
