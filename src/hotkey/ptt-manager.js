@@ -116,7 +116,9 @@ class PTTManager {
    * Handle key down events
    */
   handleKeyDown(event) {
+    console.log(`PTT: Key down event - keycode: ${event.keycode}, currentKeys before: ${Array.from(this.currentKeys)}`);
     this.currentKeys.add(event.keycode);
+    console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}, allKeysPressed: ${this.allKeysPressed()}`);
 
     // Check if all required keys are pressed
     if (this.allKeysPressed() && !this.isRecording) {
@@ -129,12 +131,14 @@ class PTTManager {
    * Handle key up events
    */
   handleKeyUp(event) {
+    console.log(`PTT: Key up event - keycode: ${event.keycode}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${Array.from(this.requiredKeys)}`);
     this.currentKeys.delete(event.keycode);
 
     // If any required key is released and we're recording, stop
     if (this.isRecording && !this.allKeysPressed()) {
       // Check minimum hold time
       const holdDuration = Date.now() - this.pressStartTime;
+      console.log(`PTT: Hold duration: ${holdDuration}ms (min: ${this.minHoldTime}ms)`);
       if (holdDuration >= this.minHoldTime) {
         this.stopRecording();
       } else {
