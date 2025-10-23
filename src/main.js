@@ -295,7 +295,7 @@ function setupIPCHandlers() {
   });
 
   // Handle settings window requests
-  ipcMain.on('open-settings', (event, options = {}) => {
+  ipcMain.handle('open-settings', async (event, options = {}) => {
     createSettingsWindow();
 
     // If specific tab requested, send message to settings window
@@ -304,6 +304,8 @@ function setupIPCHandlers() {
         settingsWindow.webContents.send('switch-tab', options.tab);
       });
     }
+
+    return { success: true };
   });
 }
 

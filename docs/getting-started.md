@@ -15,7 +15,7 @@ That's it! You're ready to dictate.
 ### Windows
 
 #### Option 1: Installer (Recommended)
-1. Download `Speak-Setup.exe` from [releases](https://github.com/yourusername/speak/releases)
+1. Download `Speak-Setup.exe` from [releases](https://github.com/namastexlabs/speak/releases)
 2. Run the installer as administrator
 3. Follow the setup wizard
 4. Launch Speak from the Start menu
@@ -33,7 +33,7 @@ That's it! You're ready to dictate.
 ### macOS
 
 #### Option 1: DMG Installer
-1. Download `Speak.dmg` from [releases](https://github.com/yourusername/speak/releases)
+1. Download `Speak.dmg` from [releases](https://github.com/namastexlabs/speak/releases)
 2. Open the DMG file
 3. Drag Speak to Applications folder
 4. Launch Speak from Applications
@@ -56,7 +56,7 @@ On first run, macOS will ask for:
 ### Linux
 
 #### Option 1: AppImage (Recommended)
-1. Download `Speak.AppImage` from [releases](https://github.com/yourusername/speak/releases)
+1. Download `Speak.AppImage` from [releases](https://github.com/namastexlabs/speak/releases)
 2. Make it executable: `chmod +x Speak.AppImage`
 3. Run: `./Speak.AppImage`
 
@@ -76,7 +76,7 @@ yay -S speak-bin
 
 #### Option 4: Build from Source
 ```bash
-git clone https://github.com/yourusername/speak.git
+git clone https://github.com/namastexlabs/speak.git
 cd speak
 npm install
 npm run build
@@ -234,8 +234,8 @@ Single channel (mono) recording is recommended for voice dictation.
 
 ### Get Help
 - [Full Documentation](./)
-- [GitHub Issues](https://github.com/yourusername/speak/issues)
-- [Community Discussions](https://github.com/yourusername/speak/discussions)
+- [GitHub Issues](https://github.com/namastexlabs/speak/issues)
+- [Community Discussions](https://github.com/namastexlabs/speak/discussions)
 
 ## 🎯 Success Metrics
 
@@ -245,7 +245,7 @@ Single channel (mono) recording is recommended for voice dictation.
 - ✅ Accuracy is >95% for clear speech
 - ✅ No permission errors or crashes
 
-**Need help?** Check the [troubleshooting guide](./troubleshooting.md) or [open an issue](https://github.com/yourusername/speak/issues).
+**Need help?** Check the [troubleshooting guide](./troubleshooting.md) or [open an issue](https://github.com/namastexlabs/speak/issues).
 
 ---
 

@@ -107,9 +107,9 @@ Before using Speak, consider:
 
 Have privacy concerns or questions?
 
-- **GitHub Issues:** [Report privacy issues](https://github.com/yourusername/speak/issues)
-- **Discussions:** [Ask privacy questions](https://github.com/yourusername/speak/discussions)
-- **Code Review:** [Audit our privacy implementation](https://github.com/yourusername/speak)
+- **GitHub Issues:** [Report privacy issues](https://github.com/namastexlabs/speak/issues)
+- **Discussions:** [Ask privacy questions](https://github.com/namastexlabs/speak/discussions)
+- **Code Review:** [Audit our privacy implementation](https://github.com/namastexlabs/speak)
 
 ## 📜 Privacy Promise
 

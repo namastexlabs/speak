@@ -205,7 +205,7 @@ class NotificationManager {
       timeoutType: 'never',
       onClick: () => {
         // Open download URL
-        shell.openExternal('https://github.com/yourusername/speak/releases');
+        shell.openExternal('https://github.com/namastexlabs/speak/releases');
       }
     });
   }

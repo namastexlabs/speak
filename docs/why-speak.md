@@ -106,7 +106,7 @@ Ready to try Speak? It's simple:
 2. **Configure**: Add your OpenAI API key (optional for offline mode)
 3. **Dictate**: Hold Ctrl+Win and start speaking
 
-[Download Speak](./getting-started.md) | [Read the Docs](./) | [Contribute on GitHub](https://github.com/yourusername/speak)
+[Download Speak](./getting-started.md) | [Read the Docs](./) | [Contribute on GitHub](https://github.com/namastexlabs/speak)
 
 ---
 

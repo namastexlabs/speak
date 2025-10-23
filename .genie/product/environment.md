@@ -121,7 +121,7 @@ ENABLE_TELEMETRY=false
 #### Installation
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/speak.git
+git clone https://github.com/namastexlabs/speak.git
 cd speak
 
 # Install dependencies
@@ -223,4 +223,4 @@ ENABLE_TELEMETRY=false
 - **OpenAI API**: https://platform.openai.com/docs/api-reference
 - **Node.js**: https://nodejs.org/
 - **Electron**: https://www.electronjs.org/
-- **GitHub**: https://github.com/yourusername/speak
+- **GitHub**: https://github.com/namastexlabs/speak

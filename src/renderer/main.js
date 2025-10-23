@@ -23,6 +23,11 @@ async function initializeUI() {
         loadSettings();
     });
 
+    // Listen for open-settings requests from main process (tray, notifications, etc.)
+    ipcRenderer.on('open-settings', (event, options = {}) => {
+        openSettings(options);
+    });
+
     console.log('UI initialized');
 }
 
@@ -168,8 +173,8 @@ function showLastTranscription(text) {
 }
 
 // Open settings window
-function openSettings() {
-    ipcRenderer.invoke('open-settings');
+function openSettings(options = {}) {
+    ipcRenderer.invoke('open-settings', options);
 }
 
 // Open external URL

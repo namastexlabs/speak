@@ -216,4 +216,4 @@
 
 *This roadmap represents our current plans and may evolve based on user feedback, technical discoveries, and market conditions.*
 
-[← Back to Documentation](./) | [Contributing Guide](./contributing.md) | [GitHub Issues](https://github.com/yourusername/speak/issues)
+[← Back to Documentation](./) | [Contributing Guide](./contributing.md) | [GitHub Issues](https://github.com/namastexlabs/speak/issues)

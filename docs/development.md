@@ -5,7 +5,7 @@
 **Get Speak running locally in 5 minutes:**
 
 ```bash
-git clone https://github.com/yourusername/speak.git
+git clone https://github.com/namastexlabs/speak.git
 cd speak
 npm install
 npm run dev
@@ -48,7 +48,7 @@ That's it! The app will open with developer tools enabled.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/speak.git
+git clone https://github.com/namastexlabs/speak.git
 cd speak
 ```
 
