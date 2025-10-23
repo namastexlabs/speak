@@ -53,14 +53,18 @@ class PTTManager {
     const keys = new Set();
     const parts = hotkeyString.split('+');
 
+    console.log(`PTT: Parsing hotkey "${hotkeyString}", parts:`, parts);
+
     for (const part of parts) {
       const trimmed = part.trim();
       const keyCode = this.getKeyCode(trimmed);
+      console.log(`PTT: Parsed "${trimmed}" -> keycode: ${keyCode}`);
       if (keyCode !== null) {
         keys.add(keyCode);
       }
     }
 
+    console.log(`PTT: Final requiredKeys:`, Array.from(keys));
     return keys;
   }
 
@@ -116,6 +120,11 @@ class PTTManager {
    * Handle key down events
    */
   handleKeyDown(event) {
+    // Ignore key repeats (when key is already pressed)
+    if (this.currentKeys.has(event.keycode)) {
+      return;
+    }
+
     console.log(`PTT: Key down event - keycode: ${event.keycode}, currentKeys before: ${Array.from(this.currentKeys)}`);
     this.currentKeys.add(event.keycode);
     console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}, allKeysPressed: ${this.allKeysPressed()}`);
