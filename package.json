@@ -44,6 +44,7 @@
     "dot-prop": "^6.0.1",
     "dotenv": "^17.2.3",
     "electron-store": "^8.2.0",
+    "is-obj": "^2.0.0",
     "node-record-lpcm16": "^1.0.1",
     "openai": "^4.20.1",
     "type-fest": "^2.17.0",
