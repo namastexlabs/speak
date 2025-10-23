@@ -7,27 +7,29 @@ class HotkeyManager {
     this.isRecording = false;
     this.recordingCallback = null;
     this.stopCallback = null;
+    this.lastTriggerTime = 0;
+    this.debounceDelay = 300; // 300ms debounce to prevent rapid toggling
   }
 
   // Register global hotkey
-  registerHotkey(modifier, callback) {
+  registerHotkey(hotkeyString, callback) {
     try {
       // Unregister existing hotkey first
       this.unregisterHotkey();
 
-      // Determine the accelerator string based on platform
+      // Parse hotkey string - can be simple like "R" or complex like "Super+Control+S"
       let accelerator;
-      if (process.platform === 'darwin') {
-        // macOS uses Command
-        accelerator = `Command+${modifier}`;
+      if (hotkeyString.includes('+')) {
+        // Already a full accelerator string (e.g., "Super+Control+S")
+        accelerator = hotkeyString;
       } else {
-        // Windows/Linux use Control
-        accelerator = `Control+${modifier}`;
+        // Simple modifier (legacy format, e.g., "R")
+        if (process.platform === 'darwin') {
+          accelerator = `Command+${hotkeyString}`;
+        } else {
+          accelerator = `Control+${hotkeyString}`;
+        }
       }
-
-      // For hold-to-record functionality, we need to handle key down/up events
-      // Electron's globalShortcut doesn't directly support hold detection
-      // We'll use a combination of key down detection and timers
 
       this.currentHotkey = accelerator;
       this.recordingCallback = callback;
@@ -56,6 +58,14 @@ class HotkeyManager {
 
   // Handle hotkey press (start/stop recording)
   handleHotkeyPress() {
+    // Debounce to prevent rapid toggling
+    const now = Date.now();
+    if (now - this.lastTriggerTime < this.debounceDelay) {
+      console.log('Hotkey press ignored (debounce)');
+      return;
+    }
+    this.lastTriggerTime = now;
+
     if (this.isRecording) {
       // Stop recording
       this.stopRecording();

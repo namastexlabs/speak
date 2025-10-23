@@ -27,33 +27,62 @@ function initializeTabs() {
 async function loadSettings() {
     try {
         const settings = await ipcRenderer.invoke('get-settings');
+        console.log('Loaded settings:', settings);
 
         // Handle API key display
         const apiKeyInput = document.getElementById('api-key');
-        if (settings.apiKey === '***configured***') {
+        if (settings.apiKey === '***configured***' || settings.apiKey) {
             apiKeyInput.value = '';
-            apiKeyInput.placeholder = 'API key configured (from settings or .env)';
+            apiKeyInput.placeholder = 'API key configured (hidden for security)';
         } else {
-            apiKeyInput.value = settings.apiKey;
+            apiKeyInput.value = '';
+            apiKeyInput.placeholder = 'sk-...';
         }
 
-        document.getElementById('audio-device').value = settings.audioDevice;
-        document.getElementById('hotkey-modifier').value = settings.hotkey;
-        document.getElementById('language').value = settings.language;
-        document.getElementById('theme').value = settings.theme;
+        // Load other settings
+        if (settings.audioDevice) {
+            document.getElementById('audio-device').value = settings.audioDevice;
+        }
+        if (settings.hotkey) {
+            document.getElementById('hotkey-modifier').value = settings.hotkey;
+        }
+        if (settings.language) {
+            document.getElementById('language').value = settings.language;
+        }
+        if (settings.theme) {
+            document.getElementById('theme').value = settings.theme;
+        }
+
+        // Update hotkey display
+        updateHotkeyDisplay();
     } catch (error) {
+        console.error('Failed to load settings:', error);
         showStatus('general-status', 'Failed to load settings: ' + error.message, 'error');
     }
 }
 
 // Update hotkey display
 function updateHotkeyDisplay() {
-    const modifier = document.getElementById('hotkey-modifier').value;
-    const display = modifier === 'Command' ? '⌘ + Hold' : modifier + ' + Hold';
+    const hotkey = document.getElementById('hotkey-modifier').value;
+    // Handle both simple (e.g., "R") and complex (e.g., "Super+Control+S") hotkey formats
+    let display;
+    if (hotkey.includes('+')) {
+        // Complex format - show as-is with friendly names
+        display = hotkey
+            .replace('Super', '⊞ Win')
+            .replace('Command', '⌘')
+            .replace('Control', 'Ctrl')
+            .replace('Alt', 'Alt')
+            .replace('Shift', '⇧');
+    } else {
+        // Simple format (legacy)
+        display = (hotkey === 'Command' ? '⌘' : hotkey) + ' + Hold';
+    }
     document.getElementById('current-hotkey').textContent = display;
 }
 
 // Event listeners for hotkey changes
+document.getElementById('hotkey-modifier').addEventListener('input', updateHotkeyDisplay);
 document.getElementById('hotkey-modifier').addEventListener('change', updateHotkeyDisplay);
 
 // API Key functions

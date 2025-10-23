@@ -18,7 +18,7 @@ const store = new Store({
     },
     hotkey: {
       type: 'string',
-      default: 'R'
+      default: 'Super+Control+S'
     },
     language: {
       type: 'string',
