@@ -2,6 +2,7 @@ const recorder = require('node-record-lpcm16');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execSync } = require('child_process');
 
 class AudioRecorder {
   constructor() {
@@ -9,6 +10,17 @@ class AudioRecorder {
     this.isRecording = false;
     this.audioChunks = [];
     this.tempFile = null;
+    this.soxAvailable = this.checkSoxAvailability();
+  }
+
+  // Check if sox is available
+  checkSoxAvailability() {
+    try {
+      execSync('which sox', { stdio: 'ignore' });
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   // Start recording audio
@@ -16,6 +28,19 @@ class AudioRecorder {
     return new Promise((resolve, reject) => {
       if (this.isRecording) {
         reject(new Error('Already recording'));
+        return;
+      }
+
+      // Check sox availability
+      if (!this.soxAvailable) {
+        reject(new Error(
+          'sox is not installed. Audio recording requires sox.\n' +
+          'Install instructions:\n' +
+          '  macOS: brew install sox\n' +
+          '  Ubuntu: sudo apt-get install sox libsox-fmt-all\n' +
+          '  Fedora: sudo dnf install sox\n' +
+          '  Windows: choco install sox or download from sox.sourceforge.net'
+        ));
         return;
       }
 
@@ -38,8 +63,22 @@ class AudioRecorder {
         // Handle recording errors
         this.recording.on('error', (error) => {
           console.error('Recording error:', error);
+          
+          // Provide more helpful error messages
+          let errorMessage = error.message;
+          if (error.message.includes('sox')) {
+            errorMessage = 'sox failed to start. Make sure sox is installed and accessible.';
+          } else if (error.message.includes('Permission')) {
+            errorMessage = 'Microphone permission denied. Please grant microphone access to Speak.';
+          } else if (error.message.includes('device')) {
+            errorMessage = 'No audio device found. Please check your microphone connection.';
+          }
+          
+          const enhancedError = new Error(errorMessage);
+          enhancedError.originalError = error;
+          
           this.stopRecording().catch(console.error);
-          reject(error);
+          reject(enhancedError);
         });
 
         // Set up stream to collect audio data
@@ -133,6 +172,12 @@ class AudioRecorder {
   // Check if microphone is available
   async checkMicrophoneAccess() {
     return new Promise((resolve) => {
+      // First check if sox is available
+      if (!this.soxAvailable) {
+        resolve(false);
+        return;
+      }
+
       try {
         // Try to start a very short recording to test microphone access
         const testRecording = recorder.record({
@@ -148,8 +193,9 @@ class AudioRecorder {
           resolve(false); // Timeout indicates no microphone access
         }, 2000);
 
-        testRecording.on('error', () => {
+        testRecording.on('error', (error) => {
           clearTimeout(timeout);
+          console.error('Microphone test error:', error.message);
           resolve(false);
         });
 
@@ -168,6 +214,17 @@ class AudioRecorder {
         resolve(false);
       }
     });
+  }
+
+  // Get system diagnostic information
+  getSystemDiagnostics() {
+    return {
+      platform: os.platform(),
+      arch: os.arch(),
+      nodeVersion: process.version,
+      soxAvailable: this.soxAvailable,
+      tempDir: os.tmpdir()
+    };
   }
 
   // Get available audio devices (basic implementation)

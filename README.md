@@ -44,32 +44,66 @@ See [Roadmap](./docs/roadmap.md) for detailed development plan and feature statu
 
 ## Quick Start
 
-**2 minutes to voice dictation:**
+**🚀 One command setup - 2 minutes to voice dictation:**
 
-1. Download installer for your platform
-2. Install and configure microphone
-3. Add OpenAI API key (optional for offline mode)
-4. Hold Ctrl+Win and start dictating
+```bash
+# Clone and run
+git clone https://github.com/yourusername/speak.git
+cd speak
+./run.sh
+```
+
+That's it! The script will:
+- ✅ Check and install dependencies
+- ✅ Generate required icons  
+- ✅ Configure system dependencies
+- ✅ Launch the app with welcome screen
+
+**Manual setup (if you prefer):**
+
+1. Clone repository: `git clone https://github.com/yourusername/speak.git`
+2. Install dependencies: `npm install`
+3. Install system dependencies: `./install.sh` (for audio recording)
+4. Generate icons: `npm run generate-icons`
+5. Start app: `npm start`
 
 [📖 Complete Getting Started Guide](./docs/getting-started.md)
 
 ### Prerequisites
 
-- Microphone (built-in or external)
-- OpenAI API key for cloud mode ([Get one here](https://platform.openai.com/api-keys))
-- Internet connection (for cloud mode)
+- **Node.js 18+** (auto-checked by run.sh)
+- **Microphone** (built-in or external)
+- **sox** (auto-installed by run.sh for audio recording)
+- **OpenAI API key** (configure in app after launch)
 
-### Installation
+### Installation Options
 
-Download installers for your platform:
-- [Windows Installer]() - Coming soon
-- [macOS Installer]() - Coming soon
-- [Linux AppImage]() - Coming soon
+**Option 1: Automated (Recommended)**
+```bash
+./run.sh          # Production mode
+./run.sh dev      # Development mode
+```
 
-**Platform-specific setup guides:**
-- [Windows Installation](./docs/getting-started.md#windows)
-- [macOS Installation](./docs/getting-started.md#macos)
-- [Linux Installation](./docs/getting-started.md#linux)
+**Option 2: Step-by-step**
+```bash
+# 1. Install system dependencies
+./install.sh
+
+# 2. Install Node.js dependencies  
+npm install
+
+# 3. Generate app icons
+npm run generate-icons
+
+# 4. Start the app
+npm start
+```
+
+**Platform-specific notes:**
+- **macOS**: `brew install sox` (auto-handled by install.sh)
+- **Ubuntu**: `sudo apt-get install sox libsox-fmt-all` (auto-handled)
+- **Windows**: `choco install sox` or download from sox.sourceforge.net
+- **Linux**: Uses system package manager automatically
 
 ### Development Setup
 
@@ -78,16 +112,31 @@ Download installers for your platform:
 git clone https://github.com/yourusername/speak.git
 cd speak
 
-# Install dependencies
+# Quick start (handles everything)
+./run.sh dev
+
+# Or manual setup
 npm install
-
-# Configure API key
-cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
-
-# Run development build
+./install.sh
+npm run generate-icons
 npm run dev
 ```
+
+### Environment Variables (Optional)
+
+Create `.env` file for development:
+```bash
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+```
+
+**Available scripts:**
+- `./run.sh` - Production entry point (recommended)
+- `./run.sh dev` - Development mode with DevTools
+- `npm run validate` - Check all dependencies
+- `npm run check-deps` - Dependency verification
+- `npm run generate-icons` - Create app icons
+- `npm run lint` - Code linting
 
 ## How It Works
 

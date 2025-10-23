@@ -5,12 +5,16 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron src/main.js",
-    "dev": "electron src/main.js",
+    "dev": "NODE_ENV=development electron src/main.js",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "lint": "eslint src/**/*.js",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "echo 'Dependencies installed successfully'",
+    "generate-icons": "node scripts/generate-icons.js",
+    "check-deps": "node scripts/check-deps.js",
+    "validate": "npm run check-deps && npm run lint"
   },
   "keywords": [
     "voice-dictation",
@@ -39,7 +43,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@types/robotjs": "^0.5.4",
     "concurrently": "^8.2.2",
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
