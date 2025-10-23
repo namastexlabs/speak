@@ -59,7 +59,9 @@
       "output": "dist-build"
     },
     "files": [
-      "dist/**/*",
+      "src/**/*",
+      "assets/**/*",
+      "scripts/**/*",
       "node_modules/**/*",
       "package.json"
     ],
