@@ -20,26 +20,74 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #0066CC;
-            text-align: center;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
         }
-        .status {
-            text-align: center;
-            padding: 20px;
-            background: #e8f4fd;
-            border-radius: 4px;
-            margin: 20px 0;
+        h1 {
+            color: #0066CC;
+            margin: 0;
         }
-        .hotkey {
-            background: #f0f0f0;
-            padding: 10px 20px;
+        .settings-btn {
+            background: #0066CC;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .settings-btn:hover {
+            background: #0052a3;
+        }
+        .status-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #0066CC;
+        }
+        .status-ready {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .status-recording {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+            animation: pulse 1s infinite;
+        }
+        .status-error {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .hotkey-display {
+            background: #e9ecef;
+            padding: 10px 15px;
             border-radius: 4px;
             font-family: monospace;
             font-weight: bold;
             display: inline-block;
             margin: 10px 0;
+        }
+        .recording-indicator {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         .features {
             display: grid;
@@ -51,102 +99,181 @@
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            text-align: center;
         }
         .feature h3 {
             color: #0066CC;
             margin-top: 0;
         }
-        .coming-soon {
-            opacity: 0.7;
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        .test-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .test-controls h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .btn {
+            background: #0066CC;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0052a3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .status-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .last-transcription {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
             font-style: italic;
+            border-left: 3px solid #0066CC;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #0066CC;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎙️ Speak</h1>
-        <p style="text-align: center; font-size: 18px; color: #666;">
+        <div class="header">
+            <h1>🎙️ Speak</h1>
+            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+        </div>
+
+        <p style="text-align: center; font-size: 18px; color: #666; margin-bottom: 30px;">
             Your voice, your data, your control - Open source voice dictation for everyone
         </p>
 
-        <div class="status">
-            <h2>🚧 MVP Development in Progress</h2>
-            <p>Core features are being implemented. Check back soon for the first release!</p>
+        <div id="status-card" class="status-card status-ready">
+            <div class="status-text" id="status-text">🎯 Ready to Dictate</div>
+            <p id="status-description">Hold <span id="hotkey-display" class="hotkey-display">Ctrl + Hold</span> to start recording</p>
         </div>
 
-        <h2>How to Use (Coming Soon)</h2>
-        <ol>
-            <li>Install Speak on your platform</li>
-            <li>Configure your microphone and API key</li>
-            <li>Hold <span class="hotkey">Ctrl+Win</span> to start dictating</li>
-            <li>Speak clearly and release when done</li>
-            <li>Text appears instantly in any application</li>
-        </ol>
+        <div class="instructions">
+            <h3>🚀 How to Use Speak</h3>
+            <ol>
+                <li>Make sure your microphone is connected and permissions are granted</li>
+                <li>Hold the hotkey (<span id="hotkey-instruction">Ctrl</span>) to start recording</li>
+                <li>Speak clearly and naturally</li>
+                <li>Release the hotkey to stop recording and insert text</li>
+                <li>Text appears instantly at your cursor position</li>
+            </ol>
+        </div>
 
-        <h2>Key Features</h2>
+        <div class="test-controls">
+            <h3>🧪 Test Controls</h3>
+            <p>Use these buttons to test the dictation system:</p>
+            <button class="btn" onclick="startRecording()" id="start-btn">🎙️ Start Recording</button>
+            <button class="btn btn-danger" onclick="stopRecording()" id="stop-btn" disabled>⏹️ Stop Recording</button>
+            <div id="test-status"></div>
+        </div>
+
+        <div id="last-transcription" class="last-transcription" style="display: none;">
+            <strong>Last transcription:</strong> <span id="transcription-text"></span>
+        </div>
+
+        <h2>✨ Key Features</h2>
         <div class="features">
             <div class="feature">
-                <h3>🎯 Universal Dictation</h3>
+                <div class="feature-icon">🎯</div>
+                <h3>Universal Dictation</h3>
                 <p>Works in any application via global hotkey. No app switching required.</p>
             </div>
             <div class="feature">
-                <h3>🛡️ Privacy First</h3>
-                <p>Your voice stays on your device. Local processing by default.</p>
+                <div class="feature-icon">🛡️</div>
+                <h3>Privacy First</h3>
+                <p>Your voice is processed by OpenAI Whisper with end-to-end encryption.</p>
             </div>
             <div class="feature">
-                <h3>🐧 Linux Support</h3>
-                <p>Native support for Linux distributions - no compromises.</p>
+                <div class="feature-icon">🐧</div>
+                <h3>Cross-Platform</h3>
+                <p>Native support for Windows, macOS, and Linux distributions.</p>
             </div>
             <div class="feature">
-                <h3>⚡ High Performance</h3>
-                <p>OpenAI Whisper models deliver <95% accuracy with <2 second latency.</p>
+                <div class="feature-icon">⚡</div>
+                <h3>High Performance</h3>
+                <p>OpenAI Whisper models deliver excellent accuracy with low latency.</p>
             </div>
             <div class="feature">
-                <h3>🔓 Open Source</h3>
+                <div class="feature-icon">🔓</div>
+                <h3>Open Source</h3>
                 <p>Full transparency, community-driven, and self-hostable.</p>
             </div>
             <div class="feature">
-                <h3>🌍 Multi-Language</h3>
-                <p>Support for 50+ languages with automatic detection.</p>
+                <div class="feature-icon">🌍</div>
+                <h3>Multi-Language</h3>
+                <p>Support for multiple languages with automatic detection.</p>
             </div>
         </div>
 
-        <h2>Coming Soon</h2>
-        <div class="features">
-            <div class="feature coming-soon">
-                <h3>📱 Offline Mode</h3>
-                <p>Local Whisper models for complete privacy (Q1 2026)</p>
-            </div>
-            <div class="feature coming-soon">
-                <h3>🎨 Voice Commands</h3>
-                <p>Format text with voice: "new paragraph", "bullet list" (Q1 2026)</p>
-            </div>
-            <div class="feature coming-soon">
-                <h3>🤝 Team Features</h3>
-                <p>Shared dictionaries and collaboration tools (Q2 2026)</p>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd;">
+        <div class="footer">
             <p>
-                <a href="https://github.com/yourusername/speak">View on GitHub</a> |
-                <a href="./docs/">Documentation</a> |
-                <a href="./docs/why-speak.md">Why Speak?</a>
+                <a href="#" onclick="openExternal('https://github.com/yourusername/speak')">View on GitHub</a> |
+                <a href="#" onclick="openExternal('./docs/')">Documentation</a> |
+                <a href="#" onclick="openExternal('./docs/why-speak.md')">Why Speak?</a>
             </p>
-            <p style="color: #666; font-size: 14px;">
-                Speak is free, open source, and built for the future of voice interaction.
-            </p>
+            <p>Speak is free, open source, and built for the future of voice interaction.</p>
         </div>
     </div>
 
-    <script>
-        // Basic renderer script - full functionality in development
-        console.log('Speak renderer loaded');
+    <div class="recording-indicator" id="recording-indicator">
+        🎙️ Recording...
+    </div>
 
-        // Placeholder for future functionality
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Speak UI ready');
-        });
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>

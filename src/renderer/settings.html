@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speak - Settings</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #0066CC;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background: white;
+            border-bottom-color: #0066CC;
+            color: #0066CC;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0066CC;
+            box-shadow: 0 0 0 2px rgba(0,102,204,0.2);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background: #0066CC;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .hotkey-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .recording-indicator {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" class="back-link" onclick="goBack()">&larr; Back to Speak</a>
+            <h1>⚙️ Settings</h1>
+            <p>Configure Speak for your voice dictation needs</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="api">API Key</div>
+            <div class="tab" data-tab="audio">Audio</div>
+            <div class="tab" data-tab="hotkey">Hotkey</div>
+            <div class="tab" data-tab="general">General</div>
+        </div>
+
+        <div id="api-tab" class="tab-content active">
+            <h2>OpenAI API Configuration</h2>
+            <div class="form-group">
+                <label for="api-key">API Key</label>
+                <input type="password" id="api-key" placeholder="sk-...">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
+                </small>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="testApiKey()">Test Connection</button>
+                <button class="btn btn-secondary" onclick="saveApiKey()">Save API Key</button>
+            </div>
+            <div id="api-status"></div>
+        </div>
+
+        <div id="audio-tab" class="tab-content">
+            <h2>Audio Device Settings</h2>
+            <div class="form-group">
+                <label for="audio-device">Microphone Device</label>
+                <select id="audio-device">
+                    <option value="default">Default System Microphone</option>
+                </select>
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Choose your preferred microphone for voice dictation
+                </small>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveAudioSettings()">Save Audio Settings</button>
+            </div>
+            <div id="audio-status"></div>
+        </div>
+
+        <div id="hotkey-tab" class="tab-content">
+            <h2>Global Hotkey</h2>
+            <p>Configure the hotkey to start/stop voice recording:</p>
+            <div class="form-group">
+                <label for="hotkey-modifier">Modifier Key</label>
+                <select id="hotkey-modifier">
+                    <option value="Control">Control (Ctrl)</option>
+                    <option value="Command">Command (⌘)</option>
+                    <option value="Alt">Alt</option>
+                    <option value="Shift">Shift</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Current Hotkey</label>
+                <div class="hotkey-display" id="current-hotkey">Ctrl + Hold</div>
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Hold the modifier key to record, release to transcribe and insert text
+                </small>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveHotkeySettings()">Save Hotkey Settings</button>
+            </div>
+            <div id="hotkey-status"></div>
+        </div>
+
+        <div id="general-tab" class="tab-content">
+            <h2>General Settings</h2>
+            <div class="form-group">
+                <label for="language">Language</label>
+                <select id="language">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ru">Russian</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="theme">Theme</label>
+                <select id="theme">
+                    <option value="system">System Default</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveGeneralSettings()">Save General Settings</button>
+            </div>
+            <div id="general-status"></div>
+        </div>
+    </div>
+
+    <div class="recording-indicator" id="recording-indicator">
+        🎙️ Recording...
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>
