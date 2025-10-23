@@ -191,12 +191,38 @@ class PTTManager {
    * Handle key up events
    */
   handleKeyUp(event) {
-    console.log(`PTT: Key up event - keycode: ${event.keycode}, mask: ${event.mask}, currentKeys: ${Array.from(this.currentKeys)}, requiredKeys: ${JSON.stringify(this.requiredKeys)}`);
+    console.log(`PTT: Key up event - keycode: ${event.keycode}, mask: ${event.mask}, currentKeys before: ${Array.from(this.currentKeys)}, requiredKeys: ${JSON.stringify(this.requiredKeys)}`);
+
+    // Remove the specific key that was released
     this.currentKeys.delete(event.keycode);
 
-    // On keyup, rely solely on our tracked key set to avoid
-    // stale/lagging modifier masks from the OS.
+    // CRITICAL: If this is a modifier key, also remove its opposite variant
+    // Windows sometimes only sends keyup for one side (e.g., left Ctrl) even if right Ctrl was never pressed
+    if (MODIFIER_KEYS.has(event.keycode)) {
+      // Find and remove the opposite variant
+      const oppositeVariants = {
+        [UiohookKey.Ctrl]: UiohookKey.CtrlRight,
+        [UiohookKey.CtrlRight]: UiohookKey.Ctrl,
+        [UiohookKey.Shift]: UiohookKey.ShiftRight,
+        [UiohookKey.ShiftRight]: UiohookKey.Shift,
+        [UiohookKey.Alt]: UiohookKey.AltRight,
+        [UiohookKey.AltRight]: UiohookKey.Alt,
+        [UiohookKey.Meta]: UiohookKey.MetaRight,
+        [UiohookKey.MetaRight]: UiohookKey.Meta,
+      };
+
+      const opposite = oppositeVariants[event.keycode];
+      if (opposite) {
+        this.currentKeys.delete(opposite);
+        console.log(`PTT: Also removed opposite variant: ${opposite}`);
+      }
+    }
+
+    console.log(`PTT: currentKeys after: ${Array.from(this.currentKeys)}`);
+
+    // Check if we still have all required keys pressed
     const stillHoldingRequiredKeys = this.allKeysPressed();
+    console.log(`PTT: stillHoldingRequiredKeys: ${stillHoldingRequiredKeys}`);
 
     if (this.holdTimer && !stillHoldingRequiredKeys) {
       console.log('PTT: Hold released before activation, cancelling pending start');
@@ -209,7 +235,7 @@ class PTTManager {
     // If any required key is released and we're recording, stop
     if (this.isRecording && !stillHoldingRequiredKeys) {
       const holdDuration = this.pressStartTime ? Date.now() - this.pressStartTime : 0;
-      console.log(`PTT: Hold duration: ${holdDuration}ms`);
+      console.log(`PTT: Hold duration: ${holdDuration}ms, STOPPING RECORDING`);
       this.stopRecording();
     }
   }
