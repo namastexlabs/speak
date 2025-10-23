@@ -163,18 +163,49 @@ class NotificationManager {
 
   // Show microphone permission required notification
   showMicrophonePermissionRequired() {
+    const isWindows = process.platform === 'win32';
+
     return this.show({
       title: 'Speak - Microphone Access Required',
-      body: 'Please grant microphone permission to use voice dictation',
+      body: isWindows
+        ? 'Click here to open Windows Settings and enable microphone access for desktop apps'
+        : 'Please grant microphone permission to use voice dictation',
       icon: this.getIconPath('warning'),
       silent: false,
       urgency: 'critical',
       timeoutType: 'never',
       onClick: () => {
-        // Could open system settings
         this.openSystemPrivacySettings();
       }
     });
+  }
+
+  // Show Windows-specific microphone setup guide (first run)
+  showWindowsMicrophoneSetup() {
+    const { dialog } = require('electron');
+
+    const response = dialog.showMessageBoxSync({
+      type: 'info',
+      title: 'Microphone Setup Required',
+      message: 'Enable Microphone Access on Windows',
+      detail: 'To use Speak for voice dictation, you need to:\n\n' +
+              '1. Click "Open Settings" below\n' +
+              '2. Turn ON "Let desktop apps access your microphone"\n' +
+              '3. Scroll down and make sure Speak is allowed\n\n' +
+              'This is a one-time setup.',
+      buttons: ['Open Settings', 'Remind Me Later'],
+      defaultId: 0,
+      cancelId: 1
+    });
+
+    if (response === 0) {
+      // User clicked "Open Settings"
+      this.openSystemPrivacySettings();
+
+      // Mark as setup initiated (will be completed when user successfully records)
+      const settingsManager = require('../config/settings');
+      settingsManager.updateSettings({ microphoneSetupInitiated: true });
+    }
   }
 
   // Show welcome notification for first run

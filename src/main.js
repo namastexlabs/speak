@@ -4,8 +4,12 @@
 // Load environment variables from .env file
 require('dotenv').config();
 
-const { app, BrowserWindow, ipcMain, dialog, shell, systemPreferences } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, systemPreferences, session } = require('electron');
 const path = require('path');
+
+// Set app name BEFORE any modules that use electron-store
+// This ensures settings are stored in "Speak" folder instead of "Electron"
+app.setName('Speak');
 
 // Import our modules
 const settingsManager = require('./config/settings');
@@ -45,7 +49,10 @@ function createMainWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: false
+      enableRemoteModule: false,
+      // Enable media access for microphone
+      webSecurity: true,
+      allowRunningInsecureContent: false
     },
     titleBarStyle: 'default',
     show: false
@@ -326,8 +333,40 @@ function setupHotkeyCallbacks() {
   });
 }
 
+// Setup permission handlers for Windows/Linux
+function setupPermissionHandlers() {
+  // Handle media permission requests (microphone, camera)
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    console.log(`Permission request: ${permission}`);
+
+    // Allow microphone access
+    if (permission === 'media') {
+      callback(true);
+      return;
+    }
+
+    // Deny other permissions by default
+    callback(false);
+  });
+
+  // Handle permission checks (for navigator.mediaDevices.getUserMedia)
+  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) => {
+    console.log(`Permission check: ${permission} from ${requestingOrigin}`);
+
+    // Allow microphone access
+    if (permission === 'media' || permission === 'mediaDevices') {
+      return true;
+    }
+
+    return false;
+  });
+}
+
 // App event handlers
 app.whenReady().then(async () => {
+  // Setup permission handlers BEFORE creating windows
+  setupPermissionHandlers();
+
   // Initialize all modules
   initializeModules();
 
@@ -389,14 +428,24 @@ app.on('browser-window-focus', () => {
   }
 });
 
-// Request microphone permission on macOS
+// Request microphone permission (platform-specific)
 if (process.platform === 'darwin') {
+  // macOS: System prompt via API
   systemPreferences.askForMediaAccess('microphone').then((granted) => {
     if (!granted) {
       console.warn('Microphone permission denied');
       notificationManager.showMicrophonePermissionRequired();
     }
   });
+} else if (process.platform === 'win32') {
+  // Windows: Show helpful message on first run to enable microphone in Settings
+  // Windows doesn't auto-prompt for non-UWP apps, user must manually enable
+  const settings = settingsManager.getAll();
+  if (!settings.microphoneSetupCompleted) {
+    setTimeout(() => {
+      notificationManager.showWindowsMicrophoneSetup();
+    }, 2000); // Show after app loads
+  }
 }
 
 // Basic app info

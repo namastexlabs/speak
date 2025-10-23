@@ -84,8 +84,13 @@ class ErrorHandler {
 
   // Handle microphone errors
   handleMicrophoneError(error, context) {
-    const userMessage = 'Microphone access is required for voice dictation.';
-    const details = 'Please grant microphone permission and ensure your microphone is connected.';
+    const isWindows = process.platform === 'win32';
+    const userMessage = isWindows
+      ? 'Microphone access must be enabled in Windows Settings.'
+      : 'Microphone access is required for voice dictation.';
+    const details = isWindows
+      ? 'Click the notification to open Settings > Privacy > Microphone'
+      : 'Please grant microphone permission and ensure your microphone is connected.';
 
     notificationManager.showMicrophonePermissionRequired();
 
