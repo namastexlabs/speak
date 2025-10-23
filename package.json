@@ -1,10 +1,10 @@
 {
   "name": "@namastexlabs/speak",
-  "version": "0.1.0-rc.3",
+  "version": "0.1.0-rc.4",
   "description": "Open source voice dictation for everyone",
   "main": "src/main.js",
   "bin": {
-    "speak": "./run.sh"
+    "speak": "./bin/speak.js"
   },
   "scripts": {
     "start": "electron src/main.js",
@@ -15,6 +15,7 @@
     "lint": "eslint src/**/*.js",
     "test": "jest",
     "postinstall": "electron-rebuild",
+    "prepublishOnly": "node scripts/generate-icons.js",
     "generate-icons": "node scripts/generate-icons.js",
     "check-deps": "node scripts/check-deps.js",
     "validate": "pnpm run check-deps && pnpm run lint"
