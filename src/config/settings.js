@@ -36,6 +36,7 @@ const store = new Store({
 
 class SettingsManager {
   constructor() {
+    this.store = store;
     this.openai = null;
     this.loadEnvApiKey();
     this.initializeOpenAI();

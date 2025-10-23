@@ -37,9 +37,8 @@ class WhisperTranscriber {
       // Prepare transcription options
       const transcriptionOptions = {
         file: audioStream,
-        model: 'whisper-1',
+        model: 'gpt-4o-transcribe',
         response_format: 'text', // Return plain text
-        temperature: 0, // More deterministic results
       };
 
       // Add language if specified
@@ -147,7 +146,7 @@ class WhisperTranscriber {
 
   // Estimate transcription cost (rough estimate)
   estimateCost(audioDurationSeconds) {
-    // Whisper API pricing: $0.006 per minute
+    // GPT-4o-transcribe API pricing: $0.006 per minute (same as Whisper)
     const costPerMinute = 0.006;
     const minutes = audioDurationSeconds / 60;
     return minutes * costPerMinute;
