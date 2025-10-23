@@ -1,30 +1,86 @@
 /* eslint-disable no-unused-vars */
-// Functions called from HTML onclick handlers: testApiKey, saveApiKey
-
 const { ipcRenderer } = require('electron');
 
-// Welcome screen functionality
+let currentStep = 1;
+
+// Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Welcome screen loaded');
-
-    // Check if we already have an API key
+    setupEventListeners();
     checkExistingSetup();
 });
+
+// Set up all event listeners
+function setupEventListeners() {
+    const apiKeyInput = document.getElementById('api-key');
+
+    // Auto-focus API key input
+    apiKeyInput.focus();
+
+    // Auto-validate on paste
+    apiKeyInput.addEventListener('paste', async (e) => {
+        // Wait for paste to complete
+        setTimeout(() => {
+            const apiKey = apiKeyInput.value.trim();
+            if (apiKey.startsWith('sk-')) {
+                validateAndAdvance(apiKey);
+            }
+        }, 100);
+    });
+
+    // Also validate on input (for manual typing)
+    let inputTimer;
+    apiKeyInput.addEventListener('input', () => {
+        clearTimeout(inputTimer);
+        const apiKey = apiKeyInput.value.trim();
+
+        // Only validate if it looks like a complete key
+        if (apiKey.startsWith('sk-') && apiKey.length > 20) {
+            inputTimer = setTimeout(() => {
+                validateAndAdvance(apiKey);
+            }, 500); // Debounce 500ms
+        }
+    });
+
+    // Handle keyboard shortcuts
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            skipWelcome();
+        }
+        // Enter on step 3 completes setup
+        if (event.key === 'Enter' && currentStep === 3) {
+            event.preventDefault();
+            completeSetup();
+        }
+    });
+
+    // Handle external links
+    document.addEventListener('click', (event) => {
+        if (event.target.tagName === 'A' && event.target.href && event.target.href.startsWith('http')) {
+            event.preventDefault();
+            ipcRenderer.invoke('open-external', event.target.href);
+        }
+    });
+}
 
 // Check if API key is already configured
 async function checkExistingSetup() {
     try {
         const settings = await ipcRenderer.invoke('get-settings');
         if (settings.apiKey === '***configured***') {
-            // API key is already configured (likely from .env)
-            showStatus('api-status', '✅ API key loaded from configuration', 'success');
+            const apiKeyInput = document.getElementById('api-key');
+            apiKeyInput.value = '••••••••••••••••';
+            apiKeyInput.disabled = true;
 
-            // Auto-validate the existing key
+            showStatus('step-1-status', '✓ API key already configured', 'success');
+
+            // Auto-validate existing key
             const validation = await ipcRenderer.invoke('test-api-key');
             if (validation.valid) {
-                showStatus('api-status', '✅ API key is valid and ready to use', 'success');
-            } else {
-                showStatus('api-status', '⚠️ API key configured but validation failed: ' + validation.error, 'error');
+                setTimeout(() => {
+                    advanceToStep(2);
+                }, 1000);
             }
         }
     } catch (error) {
@@ -32,136 +88,155 @@ async function checkExistingSetup() {
     }
 }
 
-// Test API key functionality
-async function testApiKey() {
-    const apiKey = document.getElementById('api-key').value.trim();
-    if (!apiKey) {
-        showStatus('api-status', 'Please enter an API key first', 'error');
-        return;
-    }
-
-    showStatus('api-status', 'Testing API key...', 'info');
+// Validate API key and advance if valid
+async function validateAndAdvance(apiKey) {
+    showStatus('step-1-status', 'Validating...', 'info');
 
     try {
+        // Save the key first
+        await ipcRenderer.invoke('update-settings', { apiKey });
+
+        // Then validate
         const result = await ipcRenderer.invoke('test-api-key', apiKey);
+
         if (result.valid) {
-            showStatus('api-status', '✅ API key is valid!', 'success');
+            showStatus('step-1-status', '✓ API key validated', 'success');
+
+            // Add success animation
+            const step1 = document.getElementById('step-1');
+            step1.classList.add('pulse-success');
+
+            // Auto-advance to step 2 after short delay
+            setTimeout(() => {
+                advanceToStep(2);
+            }, 800);
         } else {
-            showStatus('api-status', '❌ API key is invalid: ' + result.error, 'error');
+            showStatus('step-1-status', '✗ Invalid API key: ' + result.error, 'error');
         }
     } catch (error) {
-        showStatus('api-status', '❌ Failed to test API key: ' + error.message, 'error');
+        showStatus('step-1-status', '✗ Validation failed: ' + error.message, 'error');
     }
 }
 
-// Save API key and continue
-async function saveApiKey() {
-    const apiKey = document.getElementById('api-key').value.trim();
-    if (!apiKey) {
-        showStatus('api-status', 'Please enter an API key', 'error');
-        return;
+// Advance to specific step
+function advanceToStep(stepNumber) {
+    // Hide current step
+    const currentStepEl = document.getElementById(`step-${currentStep}`);
+    if (currentStepEl) {
+        currentStepEl.classList.remove('step-visible');
+        currentStepEl.classList.add('step-hidden');
     }
+
+    // Show new step
+    const newStepEl = document.getElementById(`step-${stepNumber}`);
+    if (newStepEl) {
+        newStepEl.classList.remove('step-hidden');
+        newStepEl.classList.add('step-visible');
+    }
+
+    // Update progress indicator
+    updateProgress(stepNumber);
+
+    currentStep = stepNumber;
+
+    // Auto-focus relevant input/button
+    if (stepNumber === 2) {
+        setTimeout(() => {
+            document.getElementById('grant-mic-btn')?.focus();
+        }, 400);
+    }
+}
+
+// Update progress indicator
+function updateProgress(activeStep) {
+    for (let i = 1; i <= 3; i++) {
+        const indicator = document.getElementById(`progress-${i}`);
+        if (i <= activeStep) {
+            indicator.classList.remove('bg-base-300');
+            indicator.classList.add('bg-primary');
+        } else {
+            indicator.classList.remove('bg-primary');
+            indicator.classList.add('bg-base-300');
+        }
+    }
+}
+
+// Grant microphone access
+async function grantMicrophoneAccess() {
+    const btn = document.getElementById('grant-mic-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    showStatus('step-2-status', 'Requesting permission...', 'info');
 
     try {
-        await ipcRenderer.invoke('update-settings', { apiKey });
-        showStatus('api-status', '✅ API key saved successfully!', 'success');
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        // Clear any previous error status after a delay
+        // Stop the stream immediately - we just wanted permission
+        stream.getTracks().forEach(track => track.stop());
+
+        showStatus('step-2-status', '✓ Microphone access granted', 'success');
+
+        // Add success animation
+        const step2 = document.getElementById('step-2');
+        step2.classList.add('pulse-success');
+
+        // Auto-advance to step 3
         setTimeout(() => {
-            document.getElementById('api-status').style.display = 'none';
-        }, 2000);
+            advanceToStep(3);
+        }, 800);
 
     } catch (error) {
-        showStatus('api-status', '❌ Failed to save API key: ' + error.message, 'error');
+        console.warn('Microphone permission denied:', error);
+        showStatus('step-2-status', '⚠ Microphone access denied. You can grant it later in settings.', 'warning');
+
+        btn.classList.remove('loading');
+        btn.disabled = false;
+
+        // Still allow advancing after a delay
+        setTimeout(() => {
+            advanceToStep(3);
+        }, 2000);
     }
 }
 
-// Complete setup and start the app
+// Complete setup
 async function completeSetup() {
     try {
         // Mark first run as complete
         await ipcRenderer.invoke('update-settings', { firstRun: false });
 
-        // Request microphone permission
-        await requestMicrophonePermission();
-
-        // Close welcome screen and show main app
+        // Close welcome and show main app
         ipcRenderer.invoke('complete-welcome');
-
     } catch (error) {
         console.error('Failed to complete setup:', error);
-        showStatus('api-status', '❌ Setup failed: ' + error.message, 'error');
     }
 }
 
-// Request microphone permission
-async function requestMicrophonePermission() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Stop the stream immediately - we just wanted permission
-        stream.getTracks().forEach(track => track.stop());
-        console.log('Microphone permission granted');
-    } catch (error) {
-        console.warn('Microphone permission denied or failed:', error);
-        // Don't block setup for this - user can grant later
-    }
-}
-
-// Skip welcome screen
+// Skip welcome
 function skipWelcome() {
     ipcRenderer.invoke('skip-welcome');
 }
 
-// Utility function to show status messages (DaisyUI compatible)
+// Show status message
 function showStatus(elementId, message, type) {
     const statusElement = document.getElementById(elementId);
 
-    // Map type to DaisyUI alert classes
     const alertClass = {
         'success': 'alert alert-success',
         'error': 'alert alert-error',
-        'info': 'alert alert-info'
+        'info': 'alert alert-info',
+        'warning': 'alert alert-warning'
     }[type] || 'alert';
 
-    statusElement.className = alertClass;
+    statusElement.className = alertClass + ' text-sm';
     statusElement.textContent = message;
     statusElement.style.display = 'block';
 
-    // Auto-hide success messages after 3 seconds
+    // Auto-hide success messages
     if (type === 'success') {
         setTimeout(() => {
             statusElement.style.display = 'none';
-        }, 3000);
+        }, 2000);
     }
 }
-
-// Handle keyboard shortcuts
-document.addEventListener('keydown', (event) => {
-    // Ctrl+Enter or Cmd+Enter to complete setup
-    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-        event.preventDefault();
-        completeSetup();
-    }
-
-    // Escape to skip
-    if (event.key === 'Escape') {
-        event.preventDefault();
-        skipWelcome();
-    }
-});
-
-// Auto-focus API key input
-document.addEventListener('DOMContentLoaded', () => {
-    const apiKeyInput = document.getElementById('api-key');
-    if (apiKeyInput) {
-        apiKeyInput.focus();
-    }
-});
-
-// Handle external links
-document.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A' && event.target.href.startsWith('http')) {
-        event.preventDefault();
-        ipcRenderer.invoke('open-external', event.target.href);
-    }
-});

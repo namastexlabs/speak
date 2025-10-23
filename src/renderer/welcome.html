@@ -5,101 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Speak</title>
     <link rel="stylesheet" href="styles.built.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step-container {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .step-hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .step-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            max-height: 500px;
+        }
+        .pulse-success {
+            animation: pulseSuccess 0.6s ease-in-out;
+        }
+        @keyframes pulseSuccess {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-base-100">
-    <div class="min-h-screen flex items-center justify-center p-6">
-        <div class="card bg-base-200 shadow-2xl max-w-2xl w-full">
-            <div class="card-body p-8">
-                <!-- Skip Link -->
-                <div class="text-right mb-4">
-                    <a href="#" class="link link-hover text-sm opacity-60" onclick="skipWelcome()">Skip Setup</a>
-                </div>
+<body class="min-h-screen bg-base-100 flex items-center justify-center">
+    <div class="w-full max-w-2xl px-6">
+        <!-- Skip Link -->
+        <div class="text-right mb-6 opacity-40 hover:opacity-100 transition-opacity">
+            <a href="#" class="link link-hover text-xs" onclick="skipWelcome()">Skip setup</a>
+        </div>
 
-                <!-- Logo & Title -->
-                <div class="text-center mb-8">
-                    <div class="text-6xl mb-4">🎙️</div>
-                    <h1 class="text-4xl font-bold mb-2">Welcome to Speak!</h1>
-                    <p class="text-lg opacity-70">
-                        Your open source voice dictation app is almost ready.<br>
-                        Let's get you set up in just a few steps.
+        <!-- Hero Section -->
+        <div class="text-center mb-12 fade-in">
+            <!-- SVG Logo -->
+            <svg class="w-24 h-24 mx-auto mb-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
+                <path d="M50 25C42.268 25 36 31.268 36 39V50C36 57.732 42.268 64 50 64C57.732 64 64 57.732 64 50V39C64 31.268 57.732 25 50 25Z" fill="currentColor"/>
+                <path d="M30 50C30 50 30 64 50 64C70 64 70 50 70 50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                <path d="M50 64V75" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                <path d="M40 75H60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+
+            <h1 class="text-5xl font-bold mb-4">Speak</h1>
+            <p class="text-xl opacity-70 max-w-md mx-auto leading-relaxed">
+                Voice dictation that works everywhere.<br>Your voice, your data, your control.
+            </p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="flex justify-center gap-2 mb-8">
+            <div id="progress-1" class="w-3 h-3 rounded-full bg-primary transition-all"></div>
+            <div id="progress-2" class="w-3 h-3 rounded-full bg-base-300 transition-all"></div>
+            <div id="progress-3" class="w-3 h-3 rounded-full bg-base-300 transition-all"></div>
+        </div>
+
+        <!-- Step 1: API Key -->
+        <div id="step-1" class="step-container step-visible">
+            <div class="card bg-base-200 shadow-xl">
+                <div class="card-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="badge badge-primary badge-lg">1</div>
+                        <h2 class="text-2xl font-semibold">OpenAI API Key</h2>
+                    </div>
+
+                    <p class="text-base opacity-70 mb-6">
+                        We use OpenAI's Whisper for transcription. Your audio is processed securely and never stored.
                     </p>
-                </div>
 
-                <!-- Step 1: API Key -->
-                <div class="flex gap-4 items-start mb-6">
-                    <div class="badge badge-primary badge-lg">1</div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold mb-1">Get Your OpenAI API Key</h3>
-                        <p class="text-sm opacity-70">You need an OpenAI API key to use Whisper for transcription. Don't worry, your voice stays private and secure.</p>
+                    <div class="form-control">
+                        <input
+                            type="password"
+                            id="api-key"
+                            placeholder="Paste your OpenAI API key (sk-...)"
+                            class="input input-lg input-bordered w-full font-mono"
+                            autocomplete="off"
+                            spellcheck="false"
+                        />
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">
+                                <a href="https://platform.openai.com/api-keys" target="_blank" class="link link-hover">Get your API key from OpenAI →</a>
+                            </span>
+                        </label>
                     </div>
-                </div>
 
-                <!-- API Key Form -->
-                <div class="alert alert-warning mb-6">
-                    <div class="w-full">
-                        <h3 class="font-bold mb-3">🔑 OpenAI API Key Setup</h3>
-                        <div class="form-control w-full mb-3">
-                            <label class="label">
-                                <span class="label-text">API Key</span>
-                            </label>
-                            <input type="password" id="api-key" placeholder="sk-..." class="input input-bordered w-full" />
-                            <label class="label">
-                                <span class="label-text-alt">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" class="link link-hover">OpenAI Platform</a></span>
-                            </label>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="btn btn-sm btn-primary" onclick="testApiKey()">Test Key</button>
-                            <button class="btn btn-sm btn-secondary flex-1" onclick="saveApiKey()">Save & Continue</button>
-                        </div>
-                        <div id="api-status" class="mt-3"></div>
+                    <!-- Status Messages -->
+                    <div id="step-1-status" class="mt-4" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Microphone Permission -->
+        <div id="step-2" class="step-container step-hidden mt-6">
+            <div class="card bg-base-200 shadow-xl">
+                <div class="card-body">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="badge badge-primary badge-lg">2</div>
+                        <h2 class="text-2xl font-semibold">Microphone Access</h2>
                     </div>
-                </div>
 
-                <!-- Step 2: Permissions -->
-                <div class="flex gap-4 items-start mb-6">
-                    <div class="badge badge-primary badge-lg">2</div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold mb-1">Grant Microphone Permission</h3>
-                        <p class="text-sm opacity-70">Speak needs access to your microphone to record your voice for transcription.</p>
-                    </div>
-                </div>
-
-                <!-- Permissions Notice -->
-                <div class="alert alert-info mb-6">
-                    <div class="w-full">
-                        <h4 class="font-bold mb-2">📋 Permissions Required</h4>
-                        <ul class="list-disc list-inside space-y-1 text-sm">
-                            <li><strong>Microphone:</strong> To record your voice</li>
-                            <li><strong>System Tray:</strong> To show recording status</li>
-                            <li><strong>Global Hotkeys:</strong> To trigger recording from any app</li>
-                        </ul>
-                        <p class="text-sm mt-2 opacity-80">
-                            These permissions will be requested when you start using Speak.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Step 3: Start -->
-                <div class="flex gap-4 items-start mb-6">
-                    <div class="badge badge-primary badge-lg">3</div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold mb-1">Start Dictating</h3>
-                        <p class="text-sm opacity-70">Hold <strong>Win+Ctrl</strong> (or <strong>⌘+Ctrl</strong> on Mac) to record, release to transcribe and insert text anywhere.</p>
-                    </div>
-                </div>
-
-                <!-- Get Started Button -->
-                <div class="card-actions justify-center mt-8">
-                    <button class="btn btn-primary btn-lg" onclick="completeSetup()">Get Started!</button>
-                </div>
-
-                <!-- Footer Notice -->
-                <div class="divider mt-8"></div>
-                <div class="text-center text-sm opacity-60">
-                    <p>
-                        By continuing, you agree that your audio is processed by OpenAI's Whisper API.<br>
-                        Your voice data is not stored or used for training.
+                    <p class="text-base opacity-70 mb-6">
+                        Grant microphone access so we can record your voice when you dictate.
                     </p>
+
+                    <button id="grant-mic-btn" class="btn btn-primary btn-lg w-full" onclick="grantMicrophoneAccess()">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                        Grant Microphone Access
+                    </button>
+
+                    <div id="step-2-status" class="mt-4" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Ready to Go -->
+        <div id="step-3" class="step-container step-hidden mt-6">
+            <div class="card bg-success text-success-content shadow-xl">
+                <div class="card-body text-center">
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <div class="badge badge-lg">3</div>
+                        <h2 class="text-2xl font-semibold">You're All Set!</h2>
+                    </div>
+
+                    <div class="text-6xl mb-4">🎉</div>
+
+                    <p class="text-lg opacity-90 mb-6">
+                        Hold <kbd class="kbd kbd-sm">Win</kbd> + <kbd class="kbd kbd-sm">Ctrl</kbd> anywhere to start dictating
+                    </p>
+
+                    <button class="btn btn-lg btn-neutral w-full" onclick="completeSetup()">
+                        Start Using Speak
+                    </button>
                 </div>
             </div>
         </div>
