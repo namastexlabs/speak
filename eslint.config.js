@@ -30,7 +30,11 @@ module.exports = [
       },
     },
     rules: {
-      'no-unused-vars': 'warn',
+      'no-unused-vars': ['warn', {
+        'varsIgnorePattern': '^_',
+        'argsIgnorePattern': '^_|^error$|^context$',
+        'caughtErrorsIgnorePattern': '^_|^error$'
+      }],
       'no-console': 'off',
     },
   },

@@ -85,7 +85,6 @@ class ErrorHandler {
   // Handle microphone errors
   handleMicrophoneError(error, context) {
     const userMessage = 'Microphone access required for voice dictation.';
-    const details = 'Please allow microphone access when prompted by your browser.';
 
     notificationManager.showMicrophonePermissionRequired();
 

@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+// Functions called from HTML onclick handlers: testApiKey, saveApiKey
+
 const { ipcRenderer } = require('electron');
 
 // Welcome screen functionality

@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+// Functions called from HTML onclick handlers: testApiKey, saveApiKey, saveAudioSettings, saveHotkeySettings, saveGeneralSettings, goBack
+
 const { ipcRenderer } = require('electron');
 
 // Tab switching functionality
