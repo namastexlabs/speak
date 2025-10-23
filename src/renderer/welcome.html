@@ -1,264 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="luxury">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Speak</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .welcome-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 90%;
-            padding: 40px;
-            text-align: center;
-            position: relative;
-        }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #0066CC;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        .subtitle {
-            color: #666;
-            font-size: 18px;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-        .step {
-            display: flex;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .step-number {
-            background: #0066CC;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 20px;
-            flex-shrink: 0;
-        }
-        .step-content h3 {
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-        .step-content p {
-            margin: 0;
-            color: #666;
-            line-height: 1.4;
-        }
-        .api-key-section {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .api-key-section h3 {
-            color: #856404;
-            margin-top: 0;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #0066CC;
-            box-shadow: 0 0 0 2px rgba(0,102,204,0.2);
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s;
-            flex: 1;
-        }
-        .btn-primary {
-            background: #0066CC;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #0052a3;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-        .status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        .skip-link {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .skip-link:hover {
-            color: #333;
-        }
-        .permissions-notice {
-            background: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .permissions-notice h4 {
-            color: #004085;
-            margin-top: 0;
-        }
-        .permissions-notice ul {
-            margin: 10px 0 0 20px;
-            padding: 0;
-        }
-        .permissions-notice li {
-            margin-bottom: 5px;
-            color: #004085;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.built.css">
 </head>
-<body>
-    <div class="welcome-container">
-        <a href="#" class="skip-link" onclick="skipWelcome()">Skip Setup</a>
+<body class="min-h-screen bg-base-100">
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="card bg-base-200 shadow-2xl max-w-2xl w-full">
+            <div class="card-body p-8">
+                <!-- Skip Link -->
+                <div class="text-right mb-4">
+                    <a href="#" class="link link-hover text-sm opacity-60" onclick="skipWelcome()">Skip Setup</a>
+                </div>
 
-        <div class="logo">🎙️</div>
-        <h1>Welcome to Speak!</h1>
-        <p class="subtitle">
-            Your open source voice dictation app is almost ready.<br>
-            Let's get you set up in just a few steps.
-        </p>
+                <!-- Logo & Title -->
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4">🎙️</div>
+                    <h1 class="text-4xl font-bold mb-2">Welcome to Speak!</h1>
+                    <p class="text-lg opacity-70">
+                        Your open source voice dictation app is almost ready.<br>
+                        Let's get you set up in just a few steps.
+                    </p>
+                </div>
 
-        <div class="step">
-            <div class="step-number">1</div>
-            <div class="step-content">
-                <h3>Get Your OpenAI API Key</h3>
-                <p>You need an OpenAI API key to use Whisper for transcription. Don't worry, your voice stays private and secure.</p>
+                <!-- Step 1: API Key -->
+                <div class="flex gap-4 items-start mb-6">
+                    <div class="badge badge-primary badge-lg">1</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold mb-1">Get Your OpenAI API Key</h3>
+                        <p class="text-sm opacity-70">You need an OpenAI API key to use Whisper for transcription. Don't worry, your voice stays private and secure.</p>
+                    </div>
+                </div>
+
+                <!-- API Key Form -->
+                <div class="alert alert-warning mb-6">
+                    <div class="w-full">
+                        <h3 class="font-bold mb-3">🔑 OpenAI API Key Setup</h3>
+                        <div class="form-control w-full mb-3">
+                            <label class="label">
+                                <span class="label-text">API Key</span>
+                            </label>
+                            <input type="password" id="api-key" placeholder="sk-..." class="input input-bordered w-full" />
+                            <label class="label">
+                                <span class="label-text-alt">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" class="link link-hover">OpenAI Platform</a></span>
+                            </label>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-sm btn-primary" onclick="testApiKey()">Test Key</button>
+                            <button class="btn btn-sm btn-secondary flex-1" onclick="saveApiKey()">Save & Continue</button>
+                        </div>
+                        <div id="api-status" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Permissions -->
+                <div class="flex gap-4 items-start mb-6">
+                    <div class="badge badge-primary badge-lg">2</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold mb-1">Grant Microphone Permission</h3>
+                        <p class="text-sm opacity-70">Speak needs access to your microphone to record your voice for transcription.</p>
+                    </div>
+                </div>
+
+                <!-- Permissions Notice -->
+                <div class="alert alert-info mb-6">
+                    <div class="w-full">
+                        <h4 class="font-bold mb-2">📋 Permissions Required</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li><strong>Microphone:</strong> To record your voice</li>
+                            <li><strong>System Tray:</strong> To show recording status</li>
+                            <li><strong>Global Hotkeys:</strong> To trigger recording from any app</li>
+                        </ul>
+                        <p class="text-sm mt-2 opacity-80">
+                            These permissions will be requested when you start using Speak.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 3: Start -->
+                <div class="flex gap-4 items-start mb-6">
+                    <div class="badge badge-primary badge-lg">3</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold mb-1">Start Dictating</h3>
+                        <p class="text-sm opacity-70">Hold <strong>Win+Ctrl</strong> (or <strong>⌘+Ctrl</strong> on Mac) to record, release to transcribe and insert text anywhere.</p>
+                    </div>
+                </div>
+
+                <!-- Get Started Button -->
+                <div class="card-actions justify-center mt-8">
+                    <button class="btn btn-primary btn-lg" onclick="completeSetup()">Get Started!</button>
+                </div>
+
+                <!-- Footer Notice -->
+                <div class="divider mt-8"></div>
+                <div class="text-center text-sm opacity-60">
+                    <p>
+                        By continuing, you agree that your audio is processed by OpenAI's Whisper API.<br>
+                        Your voice data is not stored or used for training.
+                    </p>
+                </div>
             </div>
-        </div>
-
-        <div class="api-key-section">
-            <h3>🔑 OpenAI API Key Setup</h3>
-            <div class="form-group">
-                <label for="api-key">API Key</label>
-                <input type="password" id="api-key" placeholder="sk-...">
-                <small style="color: #856404; display: block; margin-top: 5px;">
-                    Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
-                </small>
-            </div>
-            <div class="button-group" style="margin-top: 15px;">
-                <button class="btn btn-primary" onclick="testApiKey()" style="flex: none;">Test Key</button>
-                <button class="btn btn-secondary" onclick="saveApiKey()" style="flex: 1;">Save & Continue</button>
-            </div>
-            <div id="api-status"></div>
-        </div>
-
-        <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-content">
-                <h3>Grant Microphone Permission</h3>
-                <p>Speak needs access to your microphone to record your voice for transcription.</p>
-            </div>
-        </div>
-
-        <div class="permissions-notice">
-            <h4>📋 Permissions Required</h4>
-            <ul>
-                <li><strong>Microphone:</strong> To record your voice</li>
-                <li><strong>System Tray:</strong> To show recording status</li>
-                <li><strong>Global Hotkeys:</strong> To trigger recording from any app</li>
-            </ul>
-            <p style="margin: 10px 0 0 0; font-size: 14px;">
-                These permissions will be requested when you start using Speak.
-            </p>
-        </div>
-
-        <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-content">
-                <h3>Start Dictating</h3>
-                <p>Hold <strong>Ctrl</strong> (or <strong>⌘</strong> on Mac) to record, release to transcribe and insert text anywhere.</p>
-            </div>
-        </div>
-
-        <div class="button-group">
-            <button class="btn btn-primary" onclick="completeSetup()">Get Started!</button>
-        </div>
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
-            <p>
-                By continuing, you agree that your audio is processed by OpenAI's Whisper API.<br>
-                Your voice data is not stored or used for training.
-            </p>
         </div>
     </div>
 

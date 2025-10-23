@@ -112,10 +112,18 @@ function skipWelcome() {
     ipcRenderer.invoke('skip-welcome');
 }
 
-// Utility function to show status messages
+// Utility function to show status messages (DaisyUI compatible)
 function showStatus(elementId, message, type) {
     const statusElement = document.getElementById(elementId);
-    statusElement.className = 'status ' + type;
+
+    // Map type to DaisyUI alert classes
+    const alertClass = {
+        'success': 'alert alert-success',
+        'error': 'alert alert-error',
+        'info': 'alert alert-info'
+    }[type] || 'alert';
+
+    statusElement.className = alertClass;
     statusElement.textContent = message;
     statusElement.style.display = 'block';
 
