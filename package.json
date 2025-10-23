@@ -66,6 +66,7 @@
   "build": {
     "appId": "com.speak.dictation",
     "productName": "Speak",
+    "npmRebuild": false,
     "directories": {
       "output": "dist-build"
     },
