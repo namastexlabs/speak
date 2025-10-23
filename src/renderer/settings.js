@@ -1,40 +1,15 @@
 /* eslint-disable no-unused-vars */
-// Functions called from HTML onclick handlers: testApiKey, saveApiKey, saveAudioSettings, saveHotkeySettings, saveGeneralSettings, goBack
+// Functions called from HTML onclick handlers
 
 const { ipcRenderer } = require('electron');
 
-// Tab switching functionality
 document.addEventListener('DOMContentLoaded', () => {
-    initializeTabs();
     loadSettings();
-
-    // Set up hotkey event listeners after DOM is ready
-    const hotkeyInput = document.getElementById('hotkey-modifier');
-    if (hotkeyInput) {
-        hotkeyInput.addEventListener('input', updateHotkeyDisplay);
-        hotkeyInput.addEventListener('change', updateHotkeyDisplay);
-    }
+    loadAudioDevices();
+    loadAppVersion();
+    checkForUpdates();
 });
 
-function initializeTabs() {
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-active'));
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-
-            // Add active class to clicked tab
-            tab.classList.add('tab-active');
-            // Show corresponding tab content
-            const tabId = tab.getAttribute('data-tab');
-            document.getElementById(tabId + '-tab').classList.remove('hidden');
-        });
-    });
-}
-
-// Load current settings from main process
 async function loadSettings() {
     try {
         const settings = await ipcRenderer.invoke('get-settings');
@@ -60,15 +35,74 @@ async function loadSettings() {
         if (settings.language) {
             document.getElementById('language').value = settings.language;
         }
-        if (settings.theme) {
-            document.getElementById('theme').value = settings.theme;
-        }
 
-        // Update hotkey display after loading settings
         updateHotkeyDisplay();
     } catch (error) {
         console.error('Failed to load settings:', error);
         showStatus('api-status', 'Failed to load settings: ' + error.message, 'error');
+    }
+}
+
+async function loadAudioDevices() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(device => device.kind === 'audioinput');
+
+        const select = document.getElementById('audio-device');
+        select.innerHTML = '';
+
+        if (audioInputs.length === 0) {
+            select.innerHTML = '<option value="default">Default System Microphone</option>';
+            return;
+        }
+
+        audioInputs.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.deviceId || 'default';
+            option.textContent = device.label || `Microphone ${index + 1}`;
+            select.appendChild(option);
+        });
+
+        const settings = await ipcRenderer.invoke('get-settings');
+        if (settings.audioDevice) {
+            select.value = settings.audioDevice;
+        }
+    } catch (error) {
+        console.warn('Failed to enumerate audio devices:', error);
+    }
+}
+
+async function loadAppVersion() {
+    try {
+        const version = await ipcRenderer.invoke('get-app-version');
+        document.getElementById('app-version').textContent = `v${version}`;
+    } catch (error) {
+        console.error('Failed to load app version:', error);
+        document.getElementById('app-version').textContent = 'Unknown';
+    }
+}
+
+async function checkForUpdates() {
+    const updateStatus = document.getElementById('update-status');
+
+    try {
+        const updateInfo = await ipcRenderer.invoke('check-for-updates');
+
+        if (updateInfo.updateAvailable) {
+            updateStatus.innerHTML = `
+                <span class="badge badge-warning">Update Available</span>
+                <span class="text-sm font-mono">${updateInfo.latestVersion}</span>
+            `;
+        } else {
+            updateStatus.innerHTML = `
+                <span class="badge badge-success">Up to date</span>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to check for updates:', error);
+        updateStatus.innerHTML = `
+            <span class="text-sm opacity-60">Check failed</span>
+        `;
     }
 }
 
@@ -157,50 +191,86 @@ async function saveHotkeySettings() {
     }
 }
 
-// General settings functions
-async function saveGeneralSettings() {
+// Language settings functions
+async function saveLanguage() {
     const language = document.getElementById('language').value;
-    const theme = document.getElementById('theme').value;
 
     try {
-        await ipcRenderer.invoke('update-settings', { language, theme });
-        showStatus('general-status', 'General settings saved successfully! ✓', 'success');
+        await ipcRenderer.invoke('update-settings', { language });
+        showStatus('language-status', 'Language settings saved successfully! ✓', 'success');
     } catch (error) {
-        showStatus('general-status', 'Failed to save general settings: ' + error.message, 'error');
+        showStatus('language-status', 'Failed to save language settings: ' + error.message, 'error');
+    }
+}
+
+// Data management functions
+async function clearCache() {
+    if (!confirm('Are you sure you want to clear the cache? This will delete temporary audio files.')) {
+        return;
+    }
+
+    showStatus('data-status', 'Clearing cache...', 'info');
+
+    try {
+        const result = await ipcRenderer.invoke('clear-cache');
+        if (result.success) {
+            showStatus('data-status', 'Cache cleared successfully! ✓', 'success');
+        } else {
+            showStatus('data-status', 'Failed to clear cache: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showStatus('data-status', 'Failed to clear cache: ' + error.message, 'error');
+    }
+}
+
+async function clearAllData() {
+    if (!confirm('⚠️ WARNING: This will reset ALL settings and clear ALL transcription history. This action cannot be undone. Are you sure?')) {
+        return;
+    }
+
+    if (!confirm('This is your final warning. All data will be permanently deleted. Continue?')) {
+        return;
+    }
+
+    showStatus('data-status', 'Resetting all settings...', 'info');
+
+    try {
+        const result = await ipcRenderer.invoke('clear-all-data');
+        if (result.success) {
+            showStatus('data-status', 'All settings reset successfully! Restarting app...', 'success');
+            setTimeout(() => {
+                ipcRenderer.invoke('restart-app');
+            }, 2000);
+        } else {
+            showStatus('data-status', 'Failed to reset settings: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showStatus('data-status', 'Failed to reset settings: ' + error.message, 'error');
     }
 }
 
 // Utility function to show status messages
 function showStatus(elementId, message, type) {
     const statusElement = document.getElementById(elementId);
+    if (!statusElement) return;
 
-    // Map type to DaisyUI alert classes
     const alertClass = {
         'success': 'alert alert-success',
         'error': 'alert alert-error',
         'info': 'alert alert-info'
     }[type] || 'alert';
 
-    statusElement.className = alertClass + ' mt-4';
+    statusElement.className = alertClass + ' text-sm';
     statusElement.textContent = message;
-    statusElement.classList.remove('hidden');
+    statusElement.style.display = 'block';
 
-    // Auto-hide success messages after 3 seconds
     if (type === 'success') {
         setTimeout(() => {
-            statusElement.classList.add('hidden');
+            statusElement.style.display = 'none';
         }, 3000);
     }
 }
 
-// Navigation function
 function goBack() {
-    // Close settings window and show main window
     ipcRenderer.invoke('close-settings');
 }
-
-// Listen for recording state changes
-ipcRenderer.on('recording-state-changed', (event, isRecording) => {
-    const indicator = document.getElementById('recording-indicator');
-    indicator.style.display = isRecording ? 'block' : 'none';
-});

@@ -117,12 +117,12 @@ async function stopRecording() {
 
         // Stop Web Audio recording and get data
         const audioData = await window.audioBridge.stopRecording();
+        updateRecordingState(false);
 
         // Send audio data to main process for transcription
         const result = await ipcRenderer.invoke('stop-recording', audioData);
 
         if (result.success) {
-            updateRecordingState(false);
             showTestStatus(`Transcription complete! ${result.wordCount} words inserted.`, 'success');
 
             // Show the transcribed text

@@ -388,6 +388,80 @@ function setupIPCHandlers() {
       return errorHandler.handleError(error, { handler: 'get-stats' });
     }
   });
+
+  // Version and update handlers
+  ipcMain.handle('get-app-version', async () => {
+    try {
+      return app.getVersion();
+    } catch (error) {
+      return errorHandler.handleError(error, { handler: 'get-app-version' });
+    }
+  });
+
+  ipcMain.handle('check-for-updates', async () => {
+    try {
+      const https = require('https');
+      const currentVersion = app.getVersion();
+
+      return new Promise((resolve) => {
+        https.get('https://api.github.com/repos/namastexlabs/speak/releases/latest', {
+          headers: { 'User-Agent': 'Speak-App' }
+        }, (res) => {
+          let data = '';
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => {
+            try {
+              const release = JSON.parse(data);
+              const latestVersion = release.tag_name.replace(/^v/, '');
+              const updateAvailable = latestVersion !== currentVersion;
+              resolve({ updateAvailable, latestVersion, currentVersion });
+            } catch (error) {
+              resolve({ updateAvailable: false, error: 'Failed to parse release data' });
+            }
+          });
+        }).on('error', (error) => {
+          resolve({ updateAvailable: false, error: error.message });
+        });
+      });
+    } catch (error) {
+      return errorHandler.handleError(error, { handler: 'check-for-updates' });
+    }
+  });
+
+  // Data management handlers
+  ipcMain.handle('clear-cache', async () => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const tmpDir = path.join(app.getPath('userData'), 'tmp');
+
+      if (fs.existsSync(tmpDir)) {
+        const files = fs.readdirSync(tmpDir);
+        for (const file of files) {
+          fs.unlinkSync(path.join(tmpDir, file));
+        }
+        return { success: true, filesDeleted: files.length };
+      }
+      return { success: true, filesDeleted: 0 };
+    } catch (error) {
+      return errorHandler.handleError(error, { handler: 'clear-cache' });
+    }
+  });
+
+  ipcMain.handle('clear-all-data', async () => {
+    try {
+      settingsManager.store.clear();
+      transcriptionHistory.clear();
+      return { success: true };
+    } catch (error) {
+      return errorHandler.handleError(error, { handler: 'clear-all-data' });
+    }
+  });
+
+  ipcMain.handle('restart-app', async () => {
+    app.relaunch();
+    app.exit(0);
+  });
 }
 
 // App event handlers

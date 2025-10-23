@@ -3,156 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speak - Settings</title>
+    <title>Settings - Speak</title>
     <link rel="stylesheet" href="styles.built.css">
+    <style>
+        body {
+            overflow-y: auto;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-base-100">
-    <!-- Main Container -->
-    <div class="max-w-4xl mx-auto">
+<body class="min-h-screen bg-base-100 p-6">
+    <div class="max-w-3xl mx-auto fade-in">
         <!-- Header -->
-        <div class="navbar bg-base-200 border-b border-base-300">
-            <div class="flex-1">
-                <button class="btn btn-ghost btn-sm" onclick="goBack()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Back
-                </button>
-                <h1 class="text-2xl font-bold ml-4">⚙️ Settings</h1>
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">Settings</h1>
+                <p class="text-sm opacity-60">Configure Speak to your preferences</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="goBack()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Close
+            </button>
+        </div>
+
+        <!-- API Key Section -->
+        <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="badge badge-primary">1</div>
+                    <h2 class="text-2xl font-semibold">OpenAI API Key</h2>
+                </div>
+
+                <p class="text-sm opacity-70 mb-4">
+                    Your API key for OpenAI's Whisper transcription service
+                </p>
+
+                <div class="form-control">
+                    <input
+                        type="password"
+                        id="api-key"
+                        placeholder="sk-..."
+                        class="input input-bordered w-full font-mono"
+                    />
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">
+                            <a href="https://platform.openai.com/api-keys" target="_blank" class="link link-hover">Get your API key →</a>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="flex gap-2 mt-2">
+                    <button class="btn btn-sm btn-primary" onclick="testApiKey()">Test Key</button>
+                    <button class="btn btn-sm btn-secondary" onclick="saveApiKey()">Save Key</button>
+                </div>
+
+                <div id="api-status" class="mt-3" style="display: none;"></div>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs tabs-boxed bg-base-200 p-4">
-            <a class="tab tab-active" data-tab="api">API Key</a>
-            <a class="tab" data-tab="audio">Audio</a>
-            <a class="tab" data-tab="hotkey">Hotkey</a>
-            <a class="tab" data-tab="general">General</a>
+        <!-- Audio Section -->
+        <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="badge badge-primary">2</div>
+                    <h2 class="text-2xl font-semibold">Audio</h2>
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Microphone Device</span>
+                    </label>
+                    <select id="audio-device" class="select select-bordered w-full">
+                        <option value="default">Default System Microphone</option>
+                    </select>
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">Choose your preferred microphone</span>
+                    </label>
+                </div>
+
+                <button class="btn btn-sm btn-secondary" onclick="saveAudioSettings()">Save Audio Settings</button>
+                <div id="audio-status" class="mt-3" style="display: none;"></div>
+            </div>
         </div>
 
-        <!-- Tab Content -->
-        <div class="p-6">
-            <!-- API Tab -->
-            <div id="api-tab" class="tab-content">
-                <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">OpenAI API Configuration</h2>
-                        <div class="form-control w-full">
-                            <label class="label">
-                                <span class="label-text">API Key</span>
-                            </label>
-                            <input type="password" id="api-key" placeholder="sk-..." class="input input-bordered w-full" />
-                            <label class="label">
-                                <span class="label-text-alt">Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" class="link link-hover">OpenAI Platform</a></span>
-                            </label>
-                        </div>
-                        <div class="card-actions justify-end mt-4">
-                            <button class="btn btn-secondary" onclick="testApiKey()">Test Connection</button>
-                            <button class="btn btn-primary" onclick="saveApiKey()">Save API Key</button>
-                        </div>
-                        <div id="api-status" class="hidden"></div>
+        <!-- Hotkey Section -->
+        <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="badge badge-primary">3</div>
+                    <h2 class="text-2xl font-semibold">Hotkey</h2>
+                </div>
+
+                <p class="text-sm opacity-70 mb-4">
+                    Global keyboard shortcut to start/stop recording
+                </p>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Active Hotkey</span>
+                    </label>
+                    <div class="flex items-center gap-3 mb-3">
+                        <kbd class="kbd kbd-lg flex-1 justify-center" id="current-hotkey">⊞ Win + Ctrl</kbd>
                     </div>
                 </div>
-            </div>
 
-            <!-- Audio Tab -->
-            <div id="audio-tab" class="tab-content hidden">
-                <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">Audio Device Settings</h2>
-                        <div class="form-control w-full">
-                            <label class="label">
-                                <span class="label-text">Microphone Device</span>
-                            </label>
-                            <select id="audio-device" class="select select-bordered w-full">
-                                <option value="default">Default System Microphone</option>
-                            </select>
-                            <label class="label">
-                                <span class="label-text-alt">Choose your preferred microphone for voice dictation</span>
-                            </label>
-                        </div>
-                        <div class="card-actions justify-end mt-4">
-                            <button class="btn btn-primary" onclick="saveAudioSettings()">Save Audio Settings</button>
-                        </div>
-                        <div id="audio-status" class="hidden"></div>
-                    </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Custom Hotkey</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="hotkey-modifier"
+                        placeholder="Super+Control"
+                        class="input input-bordered w-full font-mono"
+                    />
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">Format: Modifier+Modifier (e.g., Super+Control)</span>
+                    </label>
                 </div>
+
+                <button class="btn btn-sm btn-secondary" onclick="saveHotkeySettings()">Save Hotkey</button>
+                <div id="hotkey-status" class="mt-3" style="display: none;"></div>
             </div>
+        </div>
 
-            <!-- Hotkey Tab -->
-            <div id="hotkey-tab" class="tab-content hidden">
-                <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">Global Hotkey</h2>
-                        <p class="text-sm opacity-70 mb-4">Current hotkey to start/stop voice recording:</p>
-
-                        <div class="form-control w-full">
-                            <label class="label">
-                                <span class="label-text">Active Hotkey</span>
-                            </label>
-                            <kbd class="kbd kbd-lg" id="current-hotkey">⊞ Win + Ctrl</kbd>
-                            <label class="label">
-                                <span class="label-text-alt">Hold down to start recording, release to stop and transcribe</span>
-                            </label>
-                        </div>
-
-                        <div class="form-control w-full mt-4">
-                            <label class="label">
-                                <span class="label-text">Custom Hotkey (Advanced)</span>
-                            </label>
-                            <input type="text" id="hotkey-modifier" placeholder="Super+Control" class="input input-bordered w-full" />
-                            <label class="label">
-                                <span class="label-text-alt">Format: Modifier+Modifier (e.g., Super+Control for Win+Ctrl or Command+Control for Mac)</span>
-                            </label>
-                        </div>
-
-                        <div class="card-actions justify-end mt-4">
-                            <button class="btn btn-primary" onclick="saveHotkeySettings()">Save Hotkey Settings</button>
-                        </div>
-                        <div id="hotkey-status" class="hidden"></div>
-                    </div>
+        <!-- Language Section -->
+        <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="badge badge-primary">4</div>
+                    <h2 class="text-2xl font-semibold">Language</h2>
                 </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Transcription Language</span>
+                    </label>
+                    <select id="language" class="select select-bordered w-full">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ru">Russian</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                        <option value="zh">Chinese</option>
+                    </select>
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">Language for voice recognition</span>
+                    </label>
+                </div>
+
+                <button class="btn btn-sm btn-secondary" onclick="saveLanguage()">Save Language</button>
+                <div id="language-status" class="mt-3" style="display: none;"></div>
             </div>
+        </div>
 
-            <!-- General Tab -->
-            <div id="general-tab" class="tab-content hidden">
-                <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">General Settings</h2>
+        <!-- Data Management Section -->
+        <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="badge badge-warning">5</div>
+                    <h2 class="text-2xl font-semibold">Data Management</h2>
+                </div>
 
-                        <div class="form-control w-full">
-                            <label class="label">
-                                <span class="label-text">Language</span>
-                            </label>
-                            <select id="language" class="select select-bordered w-full">
-                                <option value="en">English</option>
-                                <option value="es">Spanish</option>
-                                <option value="fr">French</option>
-                                <option value="de">German</option>
-                                <option value="it">Italian</option>
-                                <option value="pt">Portuguese</option>
-                                <option value="ru">Russian</option>
-                                <option value="ja">Japanese</option>
-                                <option value="ko">Korean</option>
-                                <option value="zh">Chinese</option>
-                            </select>
+                <p class="text-sm opacity-70 mb-4">
+                    Clear cached data and transcription history
+                </p>
+
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-warning" onclick="clearCache()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Clear Cache
+                    </button>
+                    <button class="btn btn-sm btn-error" onclick="clearAllData()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Reset All Settings
+                    </button>
+                </div>
+
+                <div id="data-status" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="badge badge-accent">ℹ️</div>
+                    <h2 class="text-2xl font-semibold">About</h2>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm opacity-70">Version</span>
+                        <span class="font-mono text-sm" id="app-version">Loading...</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm opacity-70">Update Status</span>
+                        <div id="update-status" class="flex items-center gap-2">
+                            <span class="loading loading-spinner loading-xs"></span>
+                            <span class="text-sm">Checking...</span>
                         </div>
+                    </div>
 
-                        <div class="form-control w-full mt-4">
-                            <label class="label">
-                                <span class="label-text">Theme</span>
-                            </label>
-                            <select id="theme" class="select select-bordered w-full">
-                                <option value="luxury">Luxury (Default)</option>
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
-                            </select>
-                        </div>
+                    <div class="divider my-2"></div>
 
-                        <div class="card-actions justify-end mt-4">
-                            <button class="btn btn-primary" onclick="saveGeneralSettings()">Save General Settings</button>
-                        </div>
-                        <div id="general-status" class="hidden"></div>
+                    <div class="flex gap-2">
+                        <a href="https://github.com/namastexlabs/speak" target="_blank" class="btn btn-sm btn-ghost flex-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                        <a href="https://github.com/namastexlabs/speak/issues" target="_blank" class="btn btn-sm btn-ghost flex-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Report Issue
+                        </a>
                     </div>
                 </div>
             </div>

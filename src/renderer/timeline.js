@@ -170,7 +170,6 @@ function setupEventListeners() {
 
     ipcRenderer.on('hotkey-stop-recording', async () => {
         await stopRecording(true); // fromHotkey = true
-        hideRecordingStatus();
     });
 
     // Listen for new transcription
@@ -194,6 +193,7 @@ async function startRecording(fromHotkey = false) {
 async function stopRecording(fromHotkey = false) {
     try {
         const audioData = await window.audioBridge.stopRecording();
+        hideRecordingStatus();
         const result = await ipcRenderer.invoke('stop-recording', audioData, { fromHotkey });
 
         if (result.success) {
