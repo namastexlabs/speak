@@ -61,6 +61,7 @@ jobs:
         with:
           files: dist-build/${{ matrix.artifact }}
           draft: false
-          prerelease: contains(github.ref, 'rc')
+          prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
