@@ -330,6 +330,30 @@ function setupHotkeyCallbacks() {
 
 // App event handlers
 app.whenReady().then(async () =>{
+  // Set up permission handlers for media devices (MUST be before creating windows)
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    console.log(`Permission request: ${permission}`);
+
+    // Allow microphone and media permissions
+    if (permission === 'media' || permission === 'mediaDevices') {
+      callback(true);
+      return;
+    }
+
+    // Deny other permissions
+    callback(false);
+  });
+
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
+    console.log(`Permission check: ${permission}`);
+
+    // Allow microphone and media permissions
+    if (permission === 'media' || permission === 'mediaDevices') {
+      return true;
+    }
+
+    return false;
+  });
 
   // Initialize all modules
   initializeModules();
