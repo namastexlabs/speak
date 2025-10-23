@@ -95,8 +95,14 @@ jobs:
             git tag "v${VERSION}"
             git push origin "v${VERSION}"
             echo "✅ Created tag v${VERSION} on commit with version bump"
-            echo "🔨 build-releases.yml will create release with executables"
+
+            # Trigger build workflow explicitly (GitHub Actions won't auto-trigger from workflow-created tags)
+            echo "🔨 Triggering build-releases.yml workflow..."
+            gh workflow run build-releases.yml --ref "v${VERSION}"
+            echo "✅ Build workflow triggered for v${VERSION}"
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
         run: |
