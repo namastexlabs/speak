@@ -16,7 +16,7 @@
     "build:linux": "electron-builder --linux",
     "lint": "eslint src/**/*.js",
     "test": "jest",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "node -e \"console.log('Skipping electron-builder install-app-deps - native deps rebuild at build time')\"",
     "prepublishOnly": "node scripts/generate-icons.js",
     "generate-icons": "node scripts/generate-icons.js",
     "check-deps": "node scripts/check-deps.js",
