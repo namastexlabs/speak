@@ -2,6 +2,8 @@
 const { ipcRenderer } = require('electron');
 
 let currentStep = 1;
+let recordedHotkey = null;
+let pressedKeys = new Set();
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
@@ -48,8 +50,8 @@ function setupEventListeners() {
             event.preventDefault();
             skipWelcome();
         }
-        // Enter on step 3 completes setup
-        if (event.key === 'Enter' && currentStep === 3) {
+        // Enter on step 4 completes setup
+        if (event.key === 'Enter' && currentStep === 4) {
             event.preventDefault();
             completeSetup();
         }
@@ -145,12 +147,14 @@ function advanceToStep(stepNumber) {
         setTimeout(() => {
             document.getElementById('grant-mic-btn')?.focus();
         }, 400);
+    } else if (stepNumber === 3) {
+        setupHotkeyRecorder();
     }
 }
 
 // Update progress indicator
 function updateProgress(activeStep) {
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 4; i++) {
         const indicator = document.getElementById(`progress-${i}`);
         if (i <= activeStep) {
             indicator.classList.remove('bg-base-300');
@@ -231,6 +235,130 @@ async function grantMicrophoneAccess() {
             advanceToStep(3);
         }, 2000);
     }
+}
+
+// Setup hotkey recorder
+function setupHotkeyRecorder() {
+    const recorder = document.getElementById('hotkey-recorder');
+    const display = document.getElementById('hotkey-display');
+
+    if (!recorder) return;
+
+    // Focus the recorder
+    setTimeout(() => recorder.focus(), 400);
+
+    // Handle click to focus
+    recorder.addEventListener('click', () => {
+        recorder.focus();
+        display.textContent = 'Press your keys...';
+        display.classList.remove('opacity-50');
+        pressedKeys.clear();
+    });
+
+    // Record keydown
+    recorder.addEventListener('keydown', (event) => {
+        event.preventDefault();
+
+        // Add key to pressed set
+        const key = normalizeKey(event);
+        if (key) {
+            pressedKeys.add(key);
+        }
+
+        // Build hotkey string
+        const hotkey = buildHotkeyString();
+        if (hotkey) {
+            display.textContent = hotkey;
+            display.classList.remove('opacity-50');
+        }
+    });
+
+    // Save on keyup (when releasing keys)
+    recorder.addEventListener('keyup', (event) => {
+        event.preventDefault();
+
+        // Only save if we have at least one modifier + key or 2+ modifiers
+        const keys = Array.from(pressedKeys);
+        if (keys.length >= 2) {
+            const hotkey = buildHotkeyString();
+            recordedHotkey = hotkey;
+
+            console.log('Hotkey recorded:', hotkey);
+            showStatus('step-3-status', `✓ Hotkey set: ${hotkey}`, 'success');
+
+            // Add success animation
+            const step3 = document.getElementById('step-3');
+            step3.classList.add('pulse-success');
+
+            // Save hotkey to settings
+            ipcRenderer.invoke('update-settings', { hotkey });
+
+            // Auto-advance to step 4
+            setTimeout(() => {
+                advanceToStep(4);
+                // Update final display
+                document.getElementById('final-hotkey-display').textContent = hotkey;
+            }, 1000);
+        }
+
+        // Clear pressed keys
+        pressedKeys.clear();
+    });
+
+    // Handle blur
+    recorder.addEventListener('blur', () => {
+        if (!recordedHotkey) {
+            display.textContent = 'Click here and press your keys...';
+            display.classList.add('opacity-50');
+        }
+    });
+}
+
+// Normalize key from event to standard format
+function normalizeKey(event) {
+    const key = event.key;
+
+    // Modifiers
+    if (key === 'Control') return 'Control';
+    if (key === 'Alt') return 'Alt';
+    if (key === 'Shift') return 'Shift';
+    if (key === 'Meta') {
+        // Meta is Win on Windows/Linux, Command on Mac
+        if (process.platform === 'darwin') return 'Command';
+        return 'Super';
+    }
+
+    // Regular keys (only allow single letters, F-keys, or special keys)
+    if (/^[A-Z]$/i.test(key)) return key.toUpperCase();
+    if (/^F\d{1,2}$/i.test(key)) return key.toUpperCase();
+    if (key === ' ' || key === 'Space') return 'Space';
+
+    return null;
+}
+
+// Build hotkey string from pressed keys
+function buildHotkeyString() {
+    const keys = Array.from(pressedKeys);
+    if (keys.length === 0) return '';
+
+    // Order: modifiers first (Control, Alt, Shift, Super/Command), then regular key
+    const modifierOrder = ['Control', 'Alt', 'Shift', 'Super', 'Command'];
+    const modifiers = [];
+    const regularKeys = [];
+
+    keys.forEach(key => {
+        if (modifierOrder.includes(key)) {
+            modifiers.push(key);
+        } else {
+            regularKeys.push(key);
+        }
+    });
+
+    // Sort modifiers by standard order
+    modifiers.sort((a, b) => modifierOrder.indexOf(a) - modifierOrder.indexOf(b));
+
+    // Combine: modifiers + regular keys
+    return [...modifiers, ...regularKeys].join('+');
 }
 
 // Complete setup

@@ -457,20 +457,24 @@ app.whenReady().then(async () =>{
     }
   };
 
-  const pttResult = pttManager.start(
-    settingsManager.getAll().hotkey,
-    pttCallback
-  );
+  const hotkey = settingsManager.getAll().hotkey;
 
-  if (!pttResult.success) {
-    console.warn('Failed to start PTT:', pttResult.error);
-    notificationManager.showError(
-      'PTT Registration Failed',
-      'Could not register the push-to-talk hotkey. You can configure it in settings.',
-      pttResult.error
-    );
+  // Only start PTT if hotkey is configured
+  if (hotkey && hotkey.trim() !== '') {
+    const pttResult = pttManager.start(hotkey, pttCallback);
+
+    if (!pttResult.success) {
+      console.warn('Failed to start PTT:', pttResult.error);
+      notificationManager.showError(
+        'PTT Registration Failed',
+        'Could not register the push-to-talk hotkey. You can configure it in settings.',
+        pttResult.error
+      );
+    } else {
+      console.log('PTT system started successfully with hotkey:', hotkey);
+    }
   } else {
-    console.log('PTT system started successfully');
+    console.log('No hotkey configured - user needs to complete setup');
   }
 
   // Set up notification event handlers

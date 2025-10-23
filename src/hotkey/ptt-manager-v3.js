@@ -64,10 +64,7 @@ class PTTManagerV3 {
    * Electron accelerators: https://www.electronjs.org/docs/latest/api/accelerator
    * Valid modifiers: Command/Cmd, Control/Ctrl, Alt, Option, AltGr, Shift, Super/Meta/CommandOrControl/CmdOrCtrl
    *
-   * IMPORTANT: Super key is NOT supported on all platforms!
-   * - macOS: Super not supported (use Command instead)
-   * - Windows: Super supported (Win key)
-   * - Linux: Super NOT reliably supported (use Control+Alt instead)
+   * Note: User-configured hotkeys should already be in a compatible format
    */
   convertHotkey(hotkey) {
     console.log(`PTT V3: Converting hotkey "${hotkey}" on platform: ${process.platform}`);
@@ -78,18 +75,18 @@ class PTTManagerV3 {
     for (const part of parts) {
       switch (part) {
         case 'Super':
-          // macOS: Use Command key
+          // On macOS, convert to Command
           if (process.platform === 'darwin') {
             electronParts.push('Command');
           }
-          // Windows: Use Super (Win key)
+          // On Windows, use Super (Win key)
           else if (process.platform === 'win32') {
             electronParts.push('Super');
           }
-          // Linux: Super not reliably supported, skip it and use just Ctrl+Alt
+          // On Linux, pass through as-is (may not work on all systems)
           else {
-            console.log('PTT V3: Skipping Super on Linux (not supported), using Ctrl+Alt instead');
-            // Don't add Super, will use Ctrl+Alt combo below
+            console.warn('PTT V3: Super key may not work reliably on Linux');
+            electronParts.push('Super');
           }
           break;
         case 'Command':
@@ -106,15 +103,9 @@ class PTTManagerV3 {
           electronParts.push('Shift');
           break;
         default:
+          // Regular keys pass through
           electronParts.push(part);
       }
-    }
-
-    // Linux fallback: if Super+Control was requested, use Control+Alt+S instead
-    if (process.platform === 'linux' && hotkey.includes('Super')) {
-      const result = 'Control+Alt+S';
-      console.log(`PTT V3: Linux fallback - converted to: "${result}"`);
-      return result;
     }
 
     const result = electronParts.join('+');

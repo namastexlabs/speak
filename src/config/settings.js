@@ -17,7 +17,7 @@ const store = new Store({
     },
     hotkey: {
       type: 'string',
-      default: process.platform === 'darwin' ? 'Command+Control' : 'Super+Control'
+      default: '' // No default - user sets this in welcome wizard
     },
     language: {
       type: 'string',
@@ -46,17 +46,9 @@ class SettingsManager {
     this.initializeOpenAI();
   }
 
-  // Migrate old hotkey formats that included letter keys
+  // Migrate old hotkey formats - no longer needed, users set their own
   migrateOldHotkeys() {
-    const currentHotkey = store.get('hotkey');
-
-    // Check if hotkey contains any letter keys (like 'S', 'R', etc.)
-    if (currentHotkey && /\+[A-Z]$/i.test(currentHotkey)) {
-      console.log(`Migrating old hotkey format: ${currentHotkey}`);
-      const defaultHotkey = process.platform === 'darwin' ? 'Command+Control' : 'Super+Control';
-      store.set('hotkey', defaultHotkey);
-      console.log(`Updated to: ${defaultHotkey}`);
-    }
+    // No migration needed - hotkeys are user-configured in welcome wizard
   }
 
   // Load API key from .env file if present and no key is stored

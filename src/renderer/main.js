@@ -9,16 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize UI elements and event listeners
 async function initializeUI() {
-    // Set up event listeners
-    document.getElementById('start-btn').addEventListener('click', startRecording);
-    document.getElementById('stop-btn').addEventListener('click', stopRecording);
-
     // Listen for hotkey-triggered recording events
     ipcRenderer.on('hotkey-start-recording', () => {
+        console.log('Hotkey START event received in renderer');
         startRecording();
     });
 
     ipcRenderer.on('hotkey-stop-recording', () => {
+        console.log('Hotkey STOP event received in renderer');
         stopRecording();
     });
 
@@ -37,7 +35,7 @@ async function initializeUI() {
         openSettings(options);
     });
 
-    console.log('UI initialized');
+    console.log('UI initialized - PTT hotkey listeners ready');
 }
 
 // Load and display current settings
@@ -45,148 +43,95 @@ async function loadSettings() {
     try {
         const settings = await ipcRenderer.invoke('get-settings');
 
-        // Update hotkey display
+        // Update hotkey display in the new UI
         const hotkeyDisplay = document.getElementById('hotkey-display');
-        const hotkeyInstruction = document.getElementById('hotkey-instruction');
+        const emptyHotkey = document.getElementById('empty-hotkey');
 
-        if (settings.hotkey === 'Command') {
-            hotkeyDisplay.textContent = '⌘ + Hold';
-            hotkeyInstruction.textContent = '⌘';
-        } else {
-            hotkeyDisplay.textContent = settings.hotkey + ' + Hold';
-            hotkeyInstruction.textContent = settings.hotkey;
+        if (hotkeyDisplay) {
+            hotkeyDisplay.textContent = formatHotkey(settings.hotkey);
+        }
+        if (emptyHotkey) {
+            emptyHotkey.textContent = formatHotkey(settings.hotkey);
         }
 
-        // Update status based on API key
-        updateStatus(settings);
+        console.log('Settings loaded, hotkey:', settings.hotkey);
 
     } catch (error) {
         console.error('Failed to load settings:', error);
-        showTestStatus('Failed to load settings: ' + error.message, 'error');
     }
 }
 
-// Update status display based on settings
-function updateStatus(settings) {
-    const statusCard = document.getElementById('status-card');
-    const statusText = document.getElementById('status-text');
-    const statusDescription = document.getElementById('status-description');
-
-    if (!settings.apiKey || settings.apiKey === '***configured***') {
-        // API key is configured
-        statusCard.className = 'status-card status-ready';
-        statusText.textContent = '🎯 Ready to Dictate';
-        statusDescription.innerHTML = 'Hold <span id="hotkey-display" class="hotkey-display">' +
-            (settings.hotkey === 'Command' ? '⌘ + Hold' : settings.hotkey + ' + Hold') +
-            '</span> to start recording';
-    } else {
-        // API key not configured
-        statusCard.className = 'status-card status-error';
-        statusText.textContent = '⚠️ Setup Required';
-        statusDescription.innerHTML = 'Please configure your OpenAI API key in <button onclick="openSettings()" style="background: none; border: none; color: #0066CC; text-decoration: underline; cursor: pointer;">Settings</button>';
+// Format hotkey for display
+function formatHotkey(hotkey) {
+    // Convert hotkey to readable format
+    if (hotkey === 'Command') {
+        return '⌘';
+    } else if (hotkey.includes('Super')) {
+        return hotkey.replace('Super', '⊞ Win').replace('+', ' + ');
     }
+    return hotkey.replace('+', ' + ');
 }
 
-// Start recording
+// Start recording (called by hotkey)
 async function startRecording() {
     try {
-        showTestStatus('Starting recording...', 'info');
+        console.log('startRecording() called');
 
         // Start Web Audio recording in renderer
         await window.audioBridge.startRecording();
 
-        // Notify main process
-        const result = await ipcRenderer.invoke('start-recording');
+        // Notify main process (with hotkey flag to suppress duplicate notifications)
+        const result = await ipcRenderer.invoke('start-recording', { fromHotkey: true });
 
         if (result.success) {
             updateRecordingState(true);
-            showTestStatus('Recording started! Speak now...', 'success');
+            console.log('Recording started successfully via hotkey');
         } else {
-            showTestStatus('Failed to start recording: ' + (result.error || 'Unknown error'), 'error');
+            console.error('Failed to start recording:', result.error);
         }
     } catch (error) {
         console.error('Recording start failed:', error);
-        showTestStatus('Recording start failed: ' + error.message, 'error');
     }
 }
 
-// Stop recording
+// Stop recording (called by hotkey or VAD)
 async function stopRecording() {
     try {
-        showTestStatus('Stopping recording and transcribing...', 'info');
+        console.log('stopRecording() called');
 
         // Stop Web Audio recording and get data
         const audioData = await window.audioBridge.stopRecording();
         updateRecordingState(false);
 
-        // Send audio data to main process for transcription
-        const result = await ipcRenderer.invoke('stop-recording', audioData);
+        console.log('Audio data captured, sending to main process for transcription...');
+
+        // Send audio data to main process for transcription (with hotkey flag)
+        const result = await ipcRenderer.invoke('stop-recording', audioData, { fromHotkey: true });
 
         if (result.success) {
-            showTestStatus(`Transcription complete! ${result.wordCount} words inserted.`, 'success');
-
-            // Show the transcribed text
-            showLastTranscription(result.text);
+            console.log(`Transcription complete! ${result.wordCount} words: "${result.text}"`);
         } else {
-            showTestStatus('Transcription failed: ' + (result.error || 'Unknown error'), 'error');
+            console.error('Transcription failed:', result.error);
         }
     } catch (error) {
         console.error('Recording stop failed:', error);
-        showTestStatus('Recording stop failed: ' + error.message, 'error');
         updateRecordingState(false);
     }
 }
 
-// Update recording state in UI
+// Update recording state in UI (new UI with recording-status element)
 function updateRecordingState(isRecording) {
-    const statusCard = document.getElementById('status-card');
-    const statusText = document.getElementById('status-text');
-    const startBtn = document.getElementById('start-btn');
-    const stopBtn = document.getElementById('stop-btn');
-    const indicator = document.getElementById('recording-indicator');
+    const recordingStatus = document.getElementById('recording-status');
 
-    if (isRecording) {
-        statusCard.className = 'status-card status-recording';
-        statusText.textContent = '🎙️ Recording...';
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
-        indicator.style.display = 'block';
-    } else {
-        statusCard.className = 'status-card status-ready';
-        statusText.textContent = '🎯 Ready to Dictate';
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-        indicator.style.display = 'none';
+    if (recordingStatus) {
+        if (isRecording) {
+            recordingStatus.classList.remove('hidden');
+            console.log('UI: Recording status shown');
+        } else {
+            recordingStatus.classList.add('hidden');
+            console.log('UI: Recording status hidden');
+        }
     }
-}
-
-// Show test status messages
-function showTestStatus(message, type) {
-    const statusElement = document.getElementById('test-status');
-    statusElement.className = 'status ' + type;
-    statusElement.textContent = message;
-    statusElement.style.display = 'block';
-
-    // Auto-hide success messages after 3 seconds
-    if (type === 'success') {
-        setTimeout(() => {
-            statusElement.style.display = 'none';
-        }, 3000);
-    }
-}
-
-// Show last transcription
-function showLastTranscription(text) {
-    const container = document.getElementById('last-transcription');
-    const textElement = document.getElementById('transcription-text');
-
-    textElement.textContent = text;
-    container.style.display = 'block';
-
-    // Auto-hide after 10 seconds
-    setTimeout(() => {
-        container.style.display = 'none';
-    }, 10000);
 }
 
 // openSettings is now defined in settings-modal.js (modal dialog instead of separate window)
@@ -198,16 +143,6 @@ function openExternal(url) {
 
 // Handle keyboard shortcuts
 document.addEventListener('keydown', (event) => {
-    // Ctrl+R or Cmd+R to start/stop recording (for testing)
-    if ((event.ctrlKey || event.metaKey) && event.key === 'r') {
-        event.preventDefault();
-        if (document.getElementById('start-btn').disabled) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    }
-
     // Ctrl+, or Cmd+, to open settings
     if ((event.ctrlKey || event.metaKey) && event.key === ',') {
         event.preventDefault();
@@ -220,8 +155,17 @@ window.addEventListener('focus', () => {
     loadSettings();
 });
 
+// Handle window controls
+function minimizeWindow() {
+    ipcRenderer.invoke('minimize-window');
+}
+
+function closeWindow() {
+    ipcRenderer.invoke('close-window');
+}
+
 // Export functions for global access (needed for onclick handlers)
 // Note: window.openSettings is defined in settings-modal.js
 window.openExternal = openExternal;
-window.startRecording = startRecording;
-window.stopRecording = stopRecording;
+window.minimizeWindow = minimizeWindow;
+window.closeWindow = closeWindow;
