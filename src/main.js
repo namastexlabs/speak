@@ -25,6 +25,7 @@ const hotkeyManager = require('./hotkey/manager');
 const SystemTray = require('./ui/tray');
 const notificationManager = require('./ui/notifications');
 const errorHandler = require('./utils/error-handler');
+const { createApplicationMenu } = require('./ui/menu');
 
 // Global references
 let mainWindow;
@@ -365,6 +366,9 @@ app.whenReady().then(async () =>{
 
   // Create main window
   createMainWindow();
+
+  // Create application menu
+  createApplicationMenu(mainWindow);
 
   // Create system tray
   systemTray = new SystemTray(mainWindow);

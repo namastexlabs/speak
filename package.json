@@ -75,7 +75,8 @@
     },
     "win": {
       "target": "nsis",
-      "sign": null
+      "sign": null,
+      "icon": "assets/icons/app-icon.png"
     },
     "linux": {
       "target": "AppImage"
